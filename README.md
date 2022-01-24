@@ -1,3 +1,5 @@
+#Attention: Work in progress. Does not work yet
+
 # Oculus Platform Godot plugin
 
 ## License
