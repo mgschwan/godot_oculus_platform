@@ -1,0 +1,6 @@
+rootProject.name = "Godot Oculus Mobile Plugin"
+
+include ':OVRPlatform'
+project(":OVRPlatform").projectDir = file("plugin")
+
+include ':samples:demo'

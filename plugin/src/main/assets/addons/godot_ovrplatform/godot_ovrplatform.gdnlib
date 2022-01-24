@@ -1,0 +1,16 @@
+[general]
+
+singleton=true
+load_once=true
+symbol_prefix="godot_ovrplatform_"
+reloadable=false
+
+[entry]
+
+Android.arm64-v8a="res://addons/godot_ovrplatform/libs/arm64-v8a/libgodot_ovrplatform.so"
+Android.armeabi-v7a="res://addons/godot_ovrplatform/libs/armeabi-v7a/libgodot_ovrplatform.so"
+
+[dependencies]
+
+Android.arm64-v8a=[ "res://addons/godot_ovrplatform/libs/arm64-v8a/libovrplatformloader.so" ]
+Android.armeabi-v7a=[ "res://addons/godot_ovrplatform/libs/armeabi-v7a/libovrplatformloader.so" ]
