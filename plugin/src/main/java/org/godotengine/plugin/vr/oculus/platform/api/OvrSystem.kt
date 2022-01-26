@@ -38,7 +38,7 @@ enum class DeviceType(internal val rangeStart: Int, internal val rangeEnd: Int =
 /**
  * Return the current [DeviceType] type.
  */
-fun OvrPlatformPlugin.getDeviceType(): DeviceType {
+fun OvrMobilePlugin.getDeviceType(): DeviceType {
     return if (isSharedLibLoaded()) {
         DeviceType.toDeviceType(nativeGetDeviceType())
     } else {
