@@ -16,6 +16,7 @@ void OvrplLoader::_register_methods() {
 }
 // need to addin the necessary structs to add in the arguements as well
 String Initialize_standalone() {
+    // this function can be found in the sdk 
     return ovr_Platform_InitializeStandaloneOculusEx();
 }
 

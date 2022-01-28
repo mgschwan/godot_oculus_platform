@@ -1,7 +1,7 @@
-#ifndef GODOT_OCULUS_MOBILE_PLUGIN_OVR_SYSTEM_H
-#define GODOT_OCULUS_MOBILE_PLUGIN_OVR_SYSTEM_H
+#ifndef GODOT_OCULUS_PLATFORM_PLUGIN_OVR_SYSTEM_H
+#define GODOT_OCULUS_PLATFORM_PLUGIN_OVR_SYSTEM_H
 
-namespace ovrmobile {
+namespace ovrplatform {
 namespace {
 using namespace godot;
 } // namespace
@@ -9,13 +9,13 @@ using namespace godot;
 /// Return the version of the vrapi driver.
 String get_driver_version();
 
-class OvrSystem : public Reference {
-    GODOT_CLASS(OvrSystem, Reference)
+class OvrplSystem : public Reference {
+    GODOT_CLASS(OvrplSystem, Reference)
 
  public:
-    OvrSystem();
+    OvrplSystem();
 
-    ~OvrSystem();
+    ~OvrplSystem();
 
     static void _register_methods();
 

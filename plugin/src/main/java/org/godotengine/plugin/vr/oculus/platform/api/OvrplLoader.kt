@@ -1,11 +1,11 @@
-@file:JvmName("OvrLoader")
+@file:JvmName("OvrplLoader")
 
 package org.godotengine.plugin.vr.oculus.platform.api
 
 import org.godotengine.plugin.vr.oculus.platform.OvrPlatformPlugin
 
 /**
- * intialize the pulgin
+ * intialize the plugin
  */
 fun OvrPlatformPlugin.Initialize_standalone(): String {
     return if (isSharedLibLoaded()) {

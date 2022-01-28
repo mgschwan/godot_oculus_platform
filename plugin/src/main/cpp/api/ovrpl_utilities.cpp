@@ -1,4 +1,4 @@
-#include "ovr_utilities.h"
+#include "ovrpl_utilities.h"
 #include "api_common.h"
 #include "common.h"
 #include <core/NodePath.hpp>
@@ -9,7 +9,7 @@
 #include <gen/SceneTree.hpp>
 #include <gen/Viewport.hpp>
 
-namespace ovrmobile {
+namespace ovrplatform {
 
 float get_ipd() {
     return 0.0F;

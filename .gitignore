@@ -90,7 +90,7 @@ lint/tmp/
 
 
 cmake-build-debug
-demo/addons/godot_ovrmobile/libs/
+demo/addons/godot_ovrplatform/libs/
 demo/export_presets.cfg
 
 # Gradle files

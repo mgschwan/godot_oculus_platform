@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // GDNative module that wraps some utility functions that need the VrApi
 
-#ifndef OVR_UTILITIES_NS_H
-#define OVR_UTILITIES_NS_H
+#ifndef ovrpl_utilities_NS_H
+#define ovrpl_utilities_NS_H
 
 #include "nativescript_common.h"
 
@@ -10,11 +10,11 @@
 extern "C" {
 #endif
 
-// registers the OvrUtilities class and functions to GDNative and should be called from godot_ovrmobile_nativescript_init
+// registers the OvrUtilities class and functions to GDNative and should be called from godot_ovrplatform_nativescript_init
 void register_gdnative_utilities(void *p_handle);
 
-GDCALLINGCONV void *ovr_utilities_constructor(godot_object *p_instance, void *p_method_data);
-GDCALLINGCONV void ovr_utilities_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data);
+GDCALLINGCONV void *ovrpl_utilities_constructor(godot_object *p_instance, void *p_method_data);
+GDCALLINGCONV void ovrpl_utilities_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data);
 
 // uses the internal left and right view matrix to compute the IPD. Returns a float in GDScript
 GDCALLINGCONV godot_variant get_ipd(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
@@ -37,4 +37,4 @@ GDCALLINGCONV godot_variant get_head_linear_acceleration(godot_object *p_instanc
 }
 #endif
 
-#endif /* !OVR_UTILITIES_NS_H */
+#endif /* !ovrpl_utilities_NS_H */
