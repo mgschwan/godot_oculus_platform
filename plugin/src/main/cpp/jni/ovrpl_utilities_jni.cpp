@@ -2,20 +2,20 @@
  * Created by Fredia Huya-Kouadio.
  */
 
-#include "api/ovr_utilities.h"
+#include "api/ovrpl_utilities.h"
 #include "jni_common.h"
 #include <jni.h>
 
 #undef JNI_PACKAGE_NAME
-#define JNI_PACKAGE_NAME org_godotengine_plugin_vr_oculus_mobile_api
+#define JNI_PACKAGE_NAME org_godotengine_plugin_vr_oculus_platform_api
 
 #undef JNI_CLASS_NAME
-#define JNI_CLASS_NAME OvrUtilities
+#define JNI_CLASS_NAME OvrplUtilities
 
 extern "C" {
 
 JNIEXPORT jfloat JNICALL JNI_METHOD(nativeGetIpd)(JNIEnv *env, jclass clazz) {
-    return ovrmobile::get_ipd(get_session());
+    return ovrplatform::get_ipd(get_session());
 }
 
 JNIEXPORT jint JNICALL JNI_METHOD(nativeGetRenderTargetWidth)(JNIEnv *env, jclass) {
@@ -34,7 +34,7 @@ JNIEXPORT jboolean JNICALL JNI_METHOD(nativeSetDefaultLayerColorScale)(JNIEnv *e
                                                                        jfloat blue,
                                                                        jfloat alpha) {
     return static_cast<jboolean>(
-            ovrmobile::set_default_layer_color_scale(get_session(), red, green, blue, alpha));
+            ovrplatform::set_default_layer_color_scale(get_session(), red, green, blue, alpha));
 }
 
 };

@@ -1,7 +1,7 @@
 /**
  * Vrapi utility functions
  */
-@file:JvmName("OvrUtilities")
+@file:JvmName("OvrplUtilities")
 
 package org.godotengine.plugin.vr.oculus.platform.api
 

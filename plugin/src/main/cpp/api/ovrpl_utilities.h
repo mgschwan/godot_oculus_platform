@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Vrapi utility functions
 
-#ifndef OVR_UTILITIES_H
-#define OVR_UTILITIES_H
+#ifndef ovrpl_utilities_H
+#define ovrpl_utilities_H
 
 #include <core/String.hpp>
 #include <gen/Node.hpp>
 #include <gen/Spatial.hpp>
 
-namespace ovrmobile {
+namespace ovrplatform {
 
 float get_ipd();
 
 } // namespace ovrmobile
 
-#endif // OVR_UTILITIES_H
+#endif // ovrpl_utilities_H
