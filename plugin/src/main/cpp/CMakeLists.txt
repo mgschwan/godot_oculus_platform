@@ -90,7 +90,7 @@ else ()
 endif (CMAKE_BUILD_TYPE MATCHES Debug)
 
 ## OVR library
-set(VRAPI_LIB_PATH "${OVR_ROOT_DIR}/Android/${ANDROID_ABI}/libovrplatformloader.so")
+set(VRAPI_LIB_PATH "${OVR_ROOT_DIR}/Android/libs/${ANDROID_ABI}/libovrplatformloader.so")
 
 add_library(vrapi SHARED IMPORTED GLOBAL)
 set_target_properties(vrapi PROPERTIES IMPORTED_LOCATION ${VRAPI_LIB_PATH})
