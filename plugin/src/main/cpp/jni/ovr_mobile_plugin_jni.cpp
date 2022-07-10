@@ -8,19 +8,19 @@
 #include "ovr_platform_plugin_wrapper.h"
 
 #undef JNI_PACKAGE_NAME
-#define JNI_PACKAGE_NAME org_godotengine_plugin_vr_oculus_mobile
+#define JNI_PACKAGE_NAME org_godotengine_plugin_vr_oculus_platform
 
 #undef JNI_CLASS_NAME
-#define JNI_CLASS_NAME OvrMobilePlugin
+#define JNI_CLASS_NAME OvrPlatformPlugin
 
 extern "C" {
 JNIEXPORT void JNICALL JNI_METHOD(initializeWrapper)(JNIEnv* env,
                                                      jobject object) {
-  //ovrmobile::OvrMobilePluginWrapper::initializeWrapper(env, object);
+  ovrplatform::OvrPlatformPluginWrapper::initializeWrapper(env, object);
 }
 
 JNIEXPORT void JNICALL JNI_METHOD(uninitializeWrapper)(JNIEnv* env,
                                                        jobject object) {
-  //ovrmobile::OvrMobilePluginWrapper::uninitializeWrapper(env);
+  ovrplatform::OvrPlatformPluginWrapper::uninitializeWrapper(env);
 }
 };

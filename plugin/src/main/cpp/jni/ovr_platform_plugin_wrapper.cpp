@@ -22,13 +22,15 @@ void OvrPlatformPluginWrapper::initializeWrapper(JNIEnv *env, jobject ovr_platfo
     jclass ovr_platform_plugin_class = env->GetObjectClass(ovr_platform_plugin_instance);
     ALOG_ASSERT(ovr_platform_plugin_class != nullptr, "Invalid jclass value.");
 
-
-    if (godot::android_api) {
+    ALOGV("Trying to initialize OVR Platform");
+    if (godot::android_api) {  
+        ALOGV("Yes we are initializing");
         jobject activity_object = env->NewGlobalRef(godot::android_api->godot_android_get_activity());
         const char *appId = "org.godotengine.vrworkout";
         ovr_PlatformInitializeAndroid(appId, activity_object, env);
+    } else {
+        ALOGV("OVR Platform can not be initialized");
     }
-    //  this_env =env;
 }
 
 void OvrPlatformPluginWrapper::uninitializeWrapper(JNIEnv *env) {
