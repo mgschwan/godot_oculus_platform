@@ -152,7 +152,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         android
         log
-        platformloader
+        ovrplatformloader
         ${GODOT-CPP})
 
 # Add the compile flags

@@ -7,7 +7,7 @@
 
 namespace ovrplatform {
 
-jobject OvrPlaformPluginWrapper::ovr_platform_plugin_instance = nullptr;
+jobject OvrPlatformPluginWrapper::ovr_platform_plugin_instance = nullptr;
 
 OvrPlatformPluginWrapper::OvrPlatformPluginWrapper() {}
 

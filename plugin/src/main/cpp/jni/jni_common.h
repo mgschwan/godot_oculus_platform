@@ -5,6 +5,7 @@
 #ifndef JNI_COMMON_H
 #define JNI_COMMON_H
 
+#include <jni.h>
 #include <core/String.hpp>
 
 /** Auxiliary macros */

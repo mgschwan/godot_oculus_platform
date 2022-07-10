@@ -5,8 +5,6 @@
 // with loads of help from Thomas "Karroffel" Herzog
 
 #include "godot_ovrplatform.h"
-#include "api/ovrpl_system.h"
-#include "gdnative/nativescript/ovrpl_utilities_ns.h"
 #include <core/Godot.hpp>
 #include <core/GodotGlobal.hpp>
 
@@ -15,17 +13,11 @@ void GDN_EXPORT godot_ovrplatform_gdnative_init(godot_gdnative_init_options *opt
 }
 
 void GDN_EXPORT godot_ovrplatform_gdnative_singleton() {
-    if (godot::arvr_api != nullptr) {
-        godot::arvr_api->godot_arvr_register_interface(&interface_struct);
-    }
+    //something
 }
 
 void GDN_EXPORT godot_ovrplatform_nativescript_init(void *handle) {
     godot::Godot::nativescript_init(handle);
-
-    register_gdnative_utilities(handle);
-    register_gdnative_loader(handle);
-    godot::register_class<ovrplatform::OvrplLoader>();
 }
 
 void GDN_EXPORT godot_ovrplatform_nativescript_terminate(void *handle) {
