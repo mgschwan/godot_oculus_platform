@@ -152,12 +152,13 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         android
         log
-        #ovrplatformloader
+        ovrplatformloader
         ${GODOT-CPP})
 
 # Add the compile flags
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
+set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " -L${OVR_ROOT_DIR}/Android/libs/${ANDROID_ABI}/")
 
 # Copy the VrApi shared library to the output directory.
 add_custom_command(OUTPUT VRAPI_SO_LIB

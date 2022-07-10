@@ -6,6 +6,8 @@
 #define OVRMOBILE_OVR_PLATFORM_PLUGIN_WRAPPER_H
 
 #include <jni.h>
+#include "OVR_Platform.h"
+
 
 namespace ovrplatform {
 
@@ -13,10 +15,15 @@ namespace ovrplatform {
 // org.godotengine.plugin.vr.oculus.mobile.OvrPlatformPlugin instance.
 class OvrPlatformPluginWrapper {
  public:
-    static void initializeWrapper(JNIEnv *env, jobject ovr_mobile_plugin);
+    static JNIEnv *this_env;
 
+    static void initializeWrapper(JNIEnv *env, jobject ovr_mobile_plugin);
     static void uninitializeWrapper(JNIEnv *env);
+
+   void initEntitlement();
+
  private:
+
     OvrPlatformPluginWrapper();
     ~OvrPlatformPluginWrapper();
 

@@ -4,6 +4,8 @@
 
 #include "ovr_platform_plugin_wrapper.h"
 #include "common.h"
+#include <core/GodotGlobal.hpp>
+
 
 namespace ovrplatform {
 
@@ -20,6 +22,13 @@ void OvrPlatformPluginWrapper::initializeWrapper(JNIEnv *env, jobject ovr_platfo
     jclass ovr_platform_plugin_class = env->GetObjectClass(ovr_platform_plugin_instance);
     ALOG_ASSERT(ovr_platform_plugin_class != nullptr, "Invalid jclass value.");
 
+
+    if (godot::android_api) {
+        jobject activity_object = env->NewGlobalRef(godot::android_api->godot_android_get_activity());
+        const char *appId = "org.godotengine.vrworkout";
+        ovr_PlatformInitializeAndroid(appId, activity_object, env);
+    }
+    //  this_env =env;
 }
 
 void OvrPlatformPluginWrapper::uninitializeWrapper(JNIEnv *env) {
@@ -28,5 +37,11 @@ void OvrPlatformPluginWrapper::uninitializeWrapper(JNIEnv *env) {
         ovr_platform_plugin_instance = nullptr;
     }
 }
+
+void OvrPlatformPluginWrapper::initEntitlement() {
+    ovr_Entitlement_GetIsViewerEntitled();
+}
+
+
 
 } // namespace ovrplatform
