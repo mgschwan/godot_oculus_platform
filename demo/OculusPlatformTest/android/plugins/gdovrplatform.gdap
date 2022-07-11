@@ -1,0 +1,5 @@
+[config]
+
+name="OVRPlatform"
+binary_type="local"
+binary="gdovrplatform.3.3.0-full-release.aar"

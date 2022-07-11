@@ -11,7 +11,9 @@ namespace ovrplatform {
 
 jobject OvrPlatformPluginWrapper::ovr_platform_plugin_instance = nullptr;
 
-OvrPlatformPluginWrapper::OvrPlatformPluginWrapper() {}
+OvrPlatformPluginWrapper::OvrPlatformPluginWrapper() {
+    // does not work here // godot::register_method("initEntitlement", &OvrPlatformPluginWrapper::initEntitlement);
+}
 
 OvrPlatformPluginWrapper::~OvrPlatformPluginWrapper() {}
 
@@ -22,10 +24,11 @@ void OvrPlatformPluginWrapper::initializeWrapper(JNIEnv *env, jobject ovr_platfo
     jclass ovr_platform_plugin_class = env->GetObjectClass(ovr_platform_plugin_instance);
     ALOG_ASSERT(ovr_platform_plugin_class != nullptr, "Invalid jclass value.");
 
+    jmethodID get_activity = env->GetMethodID(ovr_platform_plugin_class, "getMainActivity", "()Landroid/app/Activity;");
+    jobject activity_object = env->CallObjectMethod(ovr_platform_plugin_instance, get_activity);
     ALOGV("Trying to initialize OVR Platform");
-    if (godot::android_api) {  
-        ALOGV("Yes we are initializing");
-        jobject activity_object = env->NewGlobalRef(godot::android_api->godot_android_get_activity());
+    if (activity_object) {  
+        ALOGV("Yes we are initializing");      
         const char *appId = "org.godotengine.vrworkout";
         ovr_PlatformInitializeAndroid(appId, activity_object, env);
     } else {

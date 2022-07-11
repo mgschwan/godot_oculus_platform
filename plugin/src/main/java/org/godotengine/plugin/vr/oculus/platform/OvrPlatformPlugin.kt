@@ -2,6 +2,7 @@
 
 package org.godotengine.plugin.vr.oculus.platform
 
+import android.app.Activity
 import android.util.Log
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
@@ -70,6 +71,12 @@ class OvrPlatformPlugin(godot: Godot) : GodotPlugin(godot) {
         ovrEventListeners.remove(listener)
     }
  */
+
+    fun getMainActivity() : Activity? {
+        return getActivity()
+    }
+
+
     private external fun initializeWrapper()
 
     private external fun uninitializeWrapper()
