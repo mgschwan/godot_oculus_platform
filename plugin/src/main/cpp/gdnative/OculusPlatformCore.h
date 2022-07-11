@@ -19,7 +19,7 @@ public:
 	void _init();
 	void _ready();
 
-   void initEntitlement();
+   void initEntitlement(const String appId);
 
 	OculusPlatformCore();
 	~OculusPlatformCore();

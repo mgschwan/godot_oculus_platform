@@ -10,6 +10,8 @@
 namespace ovrplatform {
 
 jobject OvrPlatformPluginWrapper::ovr_platform_plugin_instance = nullptr;
+jobject OvrPlatformPluginWrapper::ovr_platform_plugin_activity = nullptr;
+JNIEnv *OvrPlatformPluginWrapper::ovr_platform_plugin_environment = nullptr;
 
 OvrPlatformPluginWrapper::OvrPlatformPluginWrapper() {
     // does not work here // godot::register_method("initEntitlement", &OvrPlatformPluginWrapper::initEntitlement);
@@ -25,17 +27,9 @@ void OvrPlatformPluginWrapper::initializeWrapper(JNIEnv *env, jobject ovr_platfo
     ALOG_ASSERT(ovr_platform_plugin_class != nullptr, "Invalid jclass value.");
 
     jmethodID get_activity = env->GetMethodID(ovr_platform_plugin_class, "getMainActivity", "()Landroid/app/Activity;");
-    jobject activity_object = env->CallObjectMethod(ovr_platform_plugin_instance, get_activity);
-    ALOGV("Trying to initialize OVR Platform");
-    if (activity_object) {  
-        ALOGV("Yes we are initializing");      
-        const char *appId = "org.godotengine.oculusplatformtest"; //TODO: let the user set it manually
-        ovr_PlatformInitializeAndroid(appId, activity_object, env);
-        ALOGV("Finished initializing");      
+    ovr_platform_plugin_activity = env->CallObjectMethod(ovr_platform_plugin_instance, get_activity);
 
-    } else {
-        ALOGV("OVR Platform can not be initialized");
-    }
+    ovr_platform_plugin_environment = env;
 }
 
 void OvrPlatformPluginWrapper::uninitializeWrapper(JNIEnv *env) {

@@ -15,19 +15,19 @@ namespace ovrplatform {
 // org.godotengine.plugin.vr.oculus.mobile.OvrPlatformPlugin instance.
 class OvrPlatformPluginWrapper {
  public:
-    static JNIEnv *this_env;
+    static jobject ovr_platform_plugin_instance;
+    static jobject ovr_platform_plugin_activity;
+    static JNIEnv *ovr_platform_plugin_environment;
+
 
     static void initializeWrapper(JNIEnv *env, jobject ovr_mobile_plugin);
     static void uninitializeWrapper(JNIEnv *env);
-
-   void initEntitlement();
 
  private:
 
     OvrPlatformPluginWrapper();
     ~OvrPlatformPluginWrapper();
 
-    static jobject ovr_platform_plugin_instance;
 };
 
 } // namespace ovrplatform

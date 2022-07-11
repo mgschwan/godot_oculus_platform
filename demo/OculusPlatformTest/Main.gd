@@ -16,14 +16,11 @@ func _ready():
 		print ("Try to get entitlement")
 		$Debug.text += "\nTry to get entitlement"
 
-		$OculusPlatformCore.initEntitlement()	
+		$OculusPlatformCore.initEntitlement("org.godotengine.oculusplatformtest")	
 		print ("We at least did not crash")
 		$Debug.text += "\nWe at least did not crash"
 
 	else:
 		$GridContainer/Status.text = "not available"
 		$Debug.text += "\nNot available on this platform"
-		
-
-	
 
