@@ -29,8 +29,10 @@ void OvrPlatformPluginWrapper::initializeWrapper(JNIEnv *env, jobject ovr_platfo
     ALOGV("Trying to initialize OVR Platform");
     if (activity_object) {  
         ALOGV("Yes we are initializing");      
-        const char *appId = "org.godotengine.vrworkout";
+        const char *appId = "org.godotengine.oculusplatformtest"; //TODO: let the user set it manually
         ovr_PlatformInitializeAndroid(appId, activity_object, env);
+        ALOGV("Finished initializing");      
+
     } else {
         ALOGV("OVR Platform can not be initialized");
     }
