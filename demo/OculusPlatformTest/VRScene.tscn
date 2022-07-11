@@ -21,6 +21,7 @@ script = ExtResource( 2 )
 [node name="ARVROrigin" type="ARVROrigin" parent="."]
 
 [node name="ARVRCamera" type="ARVRCamera" parent="ARVROrigin"]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, 0 )
 
 [node name="Viewport" type="Viewport" parent="."]
 size = Vector2( 1024, 512 )

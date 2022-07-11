@@ -45,10 +45,5 @@ void OvrPlatformPluginWrapper::uninitializeWrapper(JNIEnv *env) {
     }
 }
 
-void OvrPlatformPluginWrapper::initEntitlement() {
-    ovr_Entitlement_GetIsViewerEntitled();
-}
-
-
 
 } // namespace ovrplatform

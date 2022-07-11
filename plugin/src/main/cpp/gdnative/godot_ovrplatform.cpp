@@ -5,6 +5,7 @@
 // with loads of help from Thomas "Karroffel" Herzog
 
 #include "godot_ovrplatform.h"
+#include "gdnative/OculusPlatformCore.h"
 #include <core/Godot.hpp>
 #include <core/GodotGlobal.hpp>
 
@@ -18,6 +19,9 @@ void GDN_EXPORT godot_ovrplatform_gdnative_singleton() {
 
 void GDN_EXPORT godot_ovrplatform_nativescript_init(void *handle) {
     godot::Godot::nativescript_init(handle);
+
+    godot::register_class<godot::OculusPlatformCore>();
+
 }
 
 void GDN_EXPORT godot_ovrplatform_nativescript_terminate(void *handle) {
