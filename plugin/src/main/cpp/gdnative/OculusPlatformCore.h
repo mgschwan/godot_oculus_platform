@@ -12,14 +12,23 @@ class OculusPlatformCore : public Node {
 	GODOT_CLASS(OculusPlatformCore, Node)
 
 private:
-    //
+    bool initialized = false;
 
 public:
 	static void _register_methods();
 	void _init();
 	void _ready();
+	void _process(float delta);
+	
+	void pumpOVRMessages();
 
-   void initEntitlement(const String appId);
+	void getUser(ovrID userID);
+	void processGetUser(ovrMessageHandle message);
+
+	void checkEntitlement();
+	void processCheckEntitlement(ovrMessageHandle message);
+
+    void initEntitlement(const String appId);
 
 	OculusPlatformCore();
 	~OculusPlatformCore();
