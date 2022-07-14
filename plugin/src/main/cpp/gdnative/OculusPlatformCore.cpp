@@ -9,6 +9,7 @@ void OculusPlatformCore::_register_methods() {
 	register_method("_process", &OculusPlatformCore::_process);
 	register_method("_init", &OculusPlatformCore::_init);
 	register_method("getUser", &OculusPlatformCore::getUser);
+	register_method("getLoggedInUser", &OculusPlatformCore::getLoggedInUser);
 	register_method("checkEntitlement", &OculusPlatformCore::checkEntitlement);
 	register_method("initEntitlement", &OculusPlatformCore::initEntitlement);
 }
@@ -78,9 +79,9 @@ void OculusPlatformCore::pumpOVRMessages() {
     //   case ovrMessage_Room_KickUser:
     //     processKickUser(message);
     //     break;
-    //   case ovrMessage_User_GetLoggedInUser:
-    //     processGetLoggedInUser(message);
-    //     break;
+       case ovrMessage_User_GetLoggedInUser:
+         processGetLoggedInUser(message);
+         break;
        case ovrMessage_User_Get:
          processGetUser(message);
          break;
@@ -196,5 +197,26 @@ void OculusPlatformCore::processCheckEntitlement(ovrMessageHandle message) {
   } else {
     ALOGV("Could NOT get an entitlement\n");
     //TODO: Send a signal that the entitlement check failed
+  }
+}
+
+
+void OculusPlatformCore::getLoggedInUser() {
+  ALOGV("\nTrying to get logged in user\n");
+
+  ovrRequest req;
+
+  req = ovr_User_GetLoggedInUser();
+}
+
+void OculusPlatformCore::processGetLoggedInUser(ovrMessageHandle message) {
+  if (!ovr_Message_IsError(message)) {
+    ALOGV("Received get logged in user success\n");
+
+    ovrUserHandle user = ovr_Message_GetUser(message);
+    __android_log_print(ANDROID_LOG_VERBOSE, "godot_oculus_platform","user %llu %s\n", ovr_User_GetID(user), ovr_User_GetOculusID(user));
+  } else {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    __android_log_print(ANDROID_LOG_VERBOSE, "godot_oculus_platform","Received get user failure: %s\n", ovr_Error_GetMessage(error));
   }
 }

@@ -28,6 +28,9 @@ public:
 	void checkEntitlement();
 	void processCheckEntitlement(ovrMessageHandle message);
 
+	void getLoggedInUser();
+	void processGetLoggedInUser(ovrMessageHandle message);
+
     void initEntitlement(const String appId);
 
 	OculusPlatformCore();
