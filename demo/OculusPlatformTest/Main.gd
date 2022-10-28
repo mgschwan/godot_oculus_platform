@@ -25,8 +25,6 @@ func _ready():
 		print ("trying to get user")
 		$OculusPlatformCore.connect("get_logged_in_user", self, "_on_get_logged_in_user")
 		$OculusPlatformCore.getLoggedInUser()
-		
-		
 	else:
 		$GridContainer/Status.text = "not available"
 		$Debug.text += "\nNot available on this platform"
