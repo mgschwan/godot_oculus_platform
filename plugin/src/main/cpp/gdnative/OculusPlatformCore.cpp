@@ -46,13 +46,45 @@ void OculusPlatformCore::initEntitlement(const String appId) {
         jobject activity = ovrplatform::OvrPlatformPluginWrapper::ovr_platform_plugin_environment->CallObjectMethod(ovrplatform::OvrPlatformPluginWrapper::ovr_platform_plugin_instance, get_activity);
         
         ALOGV("Got all objects");      
-        
-        ovr_PlatformInitializeAndroid(c_appId, activity, ovrplatform::OvrPlatformPluginWrapper::ovr_platform_plugin_environment);
-        ALOGV("Finished initializing");      
-        
-        ovr_Entitlement_GetIsViewerEntitled();
-        ALOGV("Entitlement check for %s", c_appId); 
-        initialized = true;    
+
+        ovrPlatformInitializeResult status = ovr_PlatformInitializeAndroid(c_appId, activity, ovrplatform::OvrPlatformPluginWrapper::ovr_platform_plugin_environment);
+        switch (status) {
+        case ovrPlatformInitialize_Success:
+          ALOGV("initialize success"); 
+          ovr_Entitlement_GetIsViewerEntitled();
+          ALOGV("checked entitlement for %s", c_appId); 
+          initialized = true;  
+          break;
+        case ovrPlatformInitialize_Uninitialized:
+          ALOGV("initialize failure"); // exit here i guess
+          break;
+        case ovrPlatformInitialize_PreLoaded:
+          ALOGV("already loaded"); 
+          break;
+        case ovrPlatformInitialize_FileInvalid:
+          ALOGV("initialize failure , file invalid"); // exit here i guess
+          break;
+        case ovrPlatformInitialize_SignatureInvalid:
+          ALOGV("initialize failure , sign invalid");
+          break;
+        case ovrPlatformInitialize_UnableToVerify:
+          ALOGV("initialize failure , verify faliure");
+          break;
+        case ovrPlatformInitialize_VersionMismatch:
+          ALOGV("initialize failure , version mismatch");
+          break;
+        case ovrPlatformInitialize_Unknown:
+          ALOGV("initialize failure , unknown error");
+          break;
+        case ovrPlatformInitialize_InvalidCredentials:
+          ALOGV("initialize failure , Invalid Credentials");
+          break;
+        case ovrPlatformInitialize_NotEntitled:
+          ALOGV("initialize failure , Not entitled ");
+          break;
+        default:
+          ALOGV("unknown status %d",status);
+        }  
     } else {
         ALOGV("OVR Platform can not be initialized");
     }
@@ -64,7 +96,11 @@ void OculusPlatformCore::pumpOVRMessages() {
   ovrMessageHandle message = nullptr;
 
   while ((message = ovr_PopMessage()) != nullptr) {
-    switch (ovr_Message_GetType(message)) {
+    ovrMessageType message_type = ovr_Message_GetType(message);
+    switch (message_type) {
+         case ovrMessage_PlatformInitializeAndroidAsynchronous:
+            ALOGV("platform initialized async successful");
+            break;
     //   case ovrMessage_Room_CreateAndJoinPrivate:
     //     processCreateAndJoinPrivateRoom(message);
     //     break;
@@ -150,7 +186,7 @@ void OculusPlatformCore::pumpOVRMessages() {
     //     processCloudMetaData(message);
     //     break;
       default:
-        ALOGV("unknown OVR Platform message %d", ovr_Message_GetType(message));
+        ALOGV("unknown OVR Platform message %d",message_type);
     }
     //printf("\nCommand > %s", commandBuffer);
     ovr_FreeMessage(message);
@@ -180,7 +216,7 @@ void OculusPlatformCore::processGetUser(ovrMessageHandle message) {
     ovrUser* user = ovr_Message_GetUser(message);
     ovrID user_id = ovr_User_GetID(user);
     const char * user_oculus_id = ovr_User_GetOculusID(user);
-    ALOGV("user %llu %s\n",user_id ,user_oculus_id);
+    ALOGV("user  = %llu oculus id = %s \n",user_id,user_oculus_id);
     emit_signal("get_user",true,user_id,user_oculus_id);
     
   } else {
@@ -230,11 +266,12 @@ void OculusPlatformCore::processGetLoggedInUser(ovrMessageHandle message) {
     ovrUserHandle user = ovr_Message_GetUser(message);
     ovrID user_id = ovr_User_GetID(user);
     const char * user_oculus_id = ovr_User_GetOculusID(user);
-    ALOGV("user %llu %s\n", user_id, user_oculus_id);
-    
+    ALOGV("user  = %llu oculus id = %s \n",user_id,user_oculus_id);
+    emit_signal("get_logged_in_user",true,user_id,user_oculus_id);
   } else {
 
     const ovrErrorHandle error = ovr_Message_GetError(message);
     ALOGV("Received get user failure: %s\n", ovr_Error_GetMessage(error));
+    emit_signal("get_logged_in_user",false,NULL,NULL);
   }
 }
