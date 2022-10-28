@@ -109,3 +109,4 @@ local.properties
 
 plugin/libs/ovr_platform_sdk/
 *.cfg
+*.cfg
