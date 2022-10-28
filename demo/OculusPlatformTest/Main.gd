@@ -1,6 +1,8 @@
 extends Control
 
+export(String)  var APP_ID = "5593167750762370"
 var native_module
+
 # Called when the node enters the scene tree for the first time.
 func _ready():	
 	print ("Checking for OVRPlatform plugin")
@@ -15,13 +17,12 @@ func _ready():
 		
 		print ("Try to get entitlement")
 		$Debug.text += "\nTry to get entitlement"
-		$OculusPlatformCore.initEntitlement("org.godotengine.oculusplatformtest")
+		$OculusPlatformCore.connect("entitlement_check", self, "_on_entitlement_check")
+		$OculusPlatformCore.initEntitlement(APP_ID)
 		print ("We at least did not crash")
 		
 		$Debug.text += "\nWe at least did not crash"
-		print("checking entitlement")
-		$OculusPlatformCore.connect("entitlement_check", self, "_on_entitlement_check")
-		$OculusPlatformCore.checkEntitlement()
+		
 		
 	else:
 		$GridContainer/Status.text = "not available"
