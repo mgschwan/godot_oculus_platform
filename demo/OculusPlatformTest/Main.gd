@@ -17,11 +17,14 @@ func _ready():
 		
 		print ("Try to get entitlement")
 		$Debug.text += "\nTry to get entitlement"
-		$OculusPlatformCore.connect("entitlement_check", self, "_on_entitlement_check")
+		$OculusPlatformCore.connect("get_entitlement_check", self, "_on_entitlement_check")
 		$OculusPlatformCore.initEntitlement(APP_ID)
 		print ("We at least did not crash")
 		
 		$Debug.text += "\nWe at least did not crash"
+		print ("trying to get user")
+		$OculusPlatformCore.connect("get_logged_in_user", self, "_on_get_logged_in_user")
+		$OculusPlatformCore.getLoggedInUser()
 		
 		
 	else:
@@ -29,4 +32,7 @@ func _ready():
 		$Debug.text += "\nNot available on this platform"
 
 func _on_entitlement_check(success):
-	print("succesful entiltemnt_check , success = " ,success)
+	print("successful entiltemnt_check , success = " ,success)
+	
+func _on_get_logged_in_user(success,userid,oculus_user_id):
+	print("successful get_user , success = " ,success,  "user_id = ", userid  , "oculus_user_id = ", oculus_user_id )

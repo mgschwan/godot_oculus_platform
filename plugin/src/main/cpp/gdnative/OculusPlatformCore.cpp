@@ -64,7 +64,8 @@ void OculusPlatformCore::pumpOVRMessages() {
   ovrMessageHandle message = nullptr;
 
   while ((message = ovr_PopMessage()) != nullptr) {
-    switch (ovr_Message_GetType(message)) {
+    ovrMessageType message_type = ovr_Message_GetType(message);
+    switch (message_type) {
     //   case ovrMessage_Room_CreateAndJoinPrivate:
     //     processCreateAndJoinPrivateRoom(message);
     //     break;
@@ -150,7 +151,7 @@ void OculusPlatformCore::pumpOVRMessages() {
     //     processCloudMetaData(message);
     //     break;
       default:
-        ALOGV("unknown OVR Platform message %d", ovr_Message_GetType(message));
+        ALOGV("unknown OVR Platform message %d",message_type);
     }
     //printf("\nCommand > %s", commandBuffer);
     ovr_FreeMessage(message);
@@ -180,7 +181,7 @@ void OculusPlatformCore::processGetUser(ovrMessageHandle message) {
     ovrUser* user = ovr_Message_GetUser(message);
     ovrID user_id = ovr_User_GetID(user);
     const char * user_oculus_id = ovr_User_GetOculusID(user);
-    ALOGV("user %llu %s\n",user_id ,user_oculus_id);
+    ALOGV("user  = %llu oculus id = %s \n",user_id,user_oculus_id);
     emit_signal("get_user",true,user_id,user_oculus_id);
     
   } else {
@@ -230,11 +231,12 @@ void OculusPlatformCore::processGetLoggedInUser(ovrMessageHandle message) {
     ovrUserHandle user = ovr_Message_GetUser(message);
     ovrID user_id = ovr_User_GetID(user);
     const char * user_oculus_id = ovr_User_GetOculusID(user);
-    ALOGV("user %llu %s\n", user_id, user_oculus_id);
-    
+    ALOGV("user  = %llu oculus id = %s \n",user_id,user_oculus_id);
+    emit_signal("get_logged_in_user",true,user_id,user_oculus_id);
   } else {
 
     const ovrErrorHandle error = ovr_Message_GetError(message);
     ALOGV("Received get user failure: %s\n", ovr_Error_GetMessage(error));
+    emit_signal("get_logged_in_user",false,NULL,NULL);
   }
 }
