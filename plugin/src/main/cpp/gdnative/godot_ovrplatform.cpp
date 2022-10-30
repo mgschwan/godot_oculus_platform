@@ -9,8 +9,10 @@
 #include <core/Godot.hpp>
 #include <core/GodotGlobal.hpp>
 
+using namespace godot;
+
 void GDN_EXPORT godot_ovrplatform_gdnative_init(godot_gdnative_init_options *options) {
-    godot::Godot::gdnative_init(options);
+    Godot::gdnative_init(options);
 }
 
 void GDN_EXPORT godot_ovrplatform_gdnative_singleton() {
@@ -18,16 +20,14 @@ void GDN_EXPORT godot_ovrplatform_gdnative_singleton() {
 }
 
 void GDN_EXPORT godot_ovrplatform_nativescript_init(void *handle) {
-    godot::Godot::nativescript_init(handle);
-
-    godot::register_class<godot::OculusPlatformCore>();
-
+    Godot::nativescript_init(handle);
+    register_class<OculusPlatformCore>();
 }
 
 void GDN_EXPORT godot_ovrplatform_nativescript_terminate(void *handle) {
-    godot::Godot::nativescript_terminate(handle);
+    Godot::nativescript_terminate(handle);
 }
 
 void GDN_EXPORT godot_ovrplatform_gdnative_terminate(godot_gdnative_terminate_options *options) {
-    godot::Godot::gdnative_terminate(options);
+    Godot::gdnative_terminate(options);
 }

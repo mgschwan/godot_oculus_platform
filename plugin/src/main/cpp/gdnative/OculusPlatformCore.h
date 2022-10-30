@@ -8,35 +8,58 @@
 #include "OVR_Platform.h"
 
 namespace godot {
-class OculusPlatformCore : public Node {
-	GODOT_CLASS(OculusPlatformCore, Node)
+	class OculusPlatformCore : public Node {
+		GODOT_CLASS(OculusPlatformCore, Node)
 
-private:
-    bool initialized = false;
+	private:
+		void initializePlatform(char * app_id, jobject activity);
 
-public:
-	static void _register_methods();
-	void _init();
-	void _ready();
-	void _process(float delta);
-	
-	void pumpOVRMessages();
+	public:
+		static void _register_methods();
+		void _init();
+		void _ready();
+		void _process(float delta);
+		
+		void pumpOVRMessages();
+		
+		//command functions
+		void initialize(const String appId, bool async);
+		
+		void checkEntitlement();
+		void getUser(ovrID userID);
+		void getLoggedInUser();
+		void getLoggedInUserFriends();
+		void generateUserProof();
+		void getUserToken();
 
-	void getUser(ovrID userID);
-	void processGetUser(ovrMessageHandle message);
+		void writeCloudData(const String cloud_bucket, const String cloud_key, const String data, String extra, int counter);
+		void getCloudData(const String cloud_bucket, const String cloud_key);
+		void deleteCloudData(const String cloud_bucket, const String cloud_key);
+		void getCloudMetaData(const String cloud_bucket);
 
-	void checkEntitlement();
-	void processCheckEntitlement(ovrMessageHandle message);
+		// Notification handlers
+		void processInitializePlatform(ovrMessageHandle message);
 
-	void getLoggedInUser();
-	void processGetLoggedInUser(ovrMessageHandle message);
+		void processCheckEntitlement(ovrMessageHandle message);
+		void processGetUser(ovrMessageHandle message);
+		void processGetLoggedInUser(ovrMessageHandle message);
+		void processGetFriends(ovrMessageHandle message);
+		void processGenerateUserProof(ovrMessageHandle message);
+  		void processGetUserToken(ovrMessageHandle message);
 
-    void initEntitlement(const String appId);
+		void processCloudStorageLoad(ovrMessageHandle message);
+		void processCloudStorageSave(ovrMessageHandle message);
+		void processCloudStorageDelete(ovrMessageHandle message);
+		void processCloudMetaData(ovrMessageHandle message);
 
-	OculusPlatformCore();
-	~OculusPlatformCore();
+		//helper functions
+		bool isPlatformInitialized();
+		void generateUserArray(ovrUserArrayHandle users);		
 
-};
+		OculusPlatformCore();
+		~OculusPlatformCore();
+
+	};
 } // namespace godot
 
 #endif // !OCULUS_PLATFORM_CORE_H

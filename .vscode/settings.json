@@ -1,4 +1,8 @@
 {
 	"C_Cpp.errorSquiggles": "Disabled",
-	"cmake.sourceDirectory": "${workspaceFolder}/plugin"
+	"cmake.sourceDirectory": "${workspaceFolder}/plugin",
+	"files.associations": {
+		"string": "cpp",
+		"system_error": "cpp"
+	}
 }
