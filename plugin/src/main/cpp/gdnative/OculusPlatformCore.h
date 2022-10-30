@@ -4,6 +4,7 @@
 #include <Godot.hpp>
 #include <Ref.hpp>
 #include <Spatial.hpp>
+#include <Array.hpp>
 
 #include "OVR_Platform.h"
 
@@ -32,6 +33,9 @@ namespace godot {
 		void generateUserProof();
 		void getUserToken();
 
+		void writeLeaderboardEntry(String leaderboardName, String value,String extraData);
+  		void getLeaderboardEntries(String leaderboardName);
+
 		void writeCloudData(const String cloud_bucket, const String cloud_key, const String data, String extra, int counter);
 		void getCloudData(const String cloud_bucket, const String cloud_key);
 		void deleteCloudData(const String cloud_bucket, const String cloud_key);
@@ -46,6 +50,9 @@ namespace godot {
 		void processGetFriends(ovrMessageHandle message);
 		void processGenerateUserProof(ovrMessageHandle message);
   		void processGetUserToken(ovrMessageHandle message);
+
+		void processWriteLeaderboardEntry(ovrMessageHandle message);
+  		void processGetLeaderboardEntries(ovrMessageHandle message);
 
 		void processCloudStorageLoad(ovrMessageHandle message);
 		void processCloudStorageSave(ovrMessageHandle message);

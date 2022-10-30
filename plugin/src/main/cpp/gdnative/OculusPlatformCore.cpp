@@ -1,6 +1,7 @@
 #include "common.h"
 #include "OculusPlatformCore.h"
 #include "jni/ovr_platform_plugin_wrapper.h"
+#include <stdlib.h>
 
 using namespace godot;
 
@@ -13,12 +14,15 @@ void OculusPlatformCore::_register_methods() {
 	register_method("initialize", &OculusPlatformCore::initialize);
   register_method("platform_initialized", &OculusPlatformCore::isPlatformInitialized);
   register_method("checkEntitlement", &OculusPlatformCore::checkEntitlement);
+  
   register_method("getUser", &OculusPlatformCore::getUser);
 	register_method("getLoggedInUser", &OculusPlatformCore::getLoggedInUser);
 	register_method("getLoggedInUserFriends", &OculusPlatformCore::getLoggedInUserFriends);
   register_method("getUserToken", &OculusPlatformCore::getUserToken);
   register_method("getUserProof", &OculusPlatformCore::generateUserProof);
 	
+  register_method("submitScoreToLeaderboard", &OculusPlatformCore::writeLeaderboardEntry);
+  register_method("getScoreFromLeaderboard", &OculusPlatformCore::getLeaderboardEntries);
 
   register_method("writeCloudData", &OculusPlatformCore::writeCloudData);
 	register_method("getCloudData", &OculusPlatformCore::getCloudData);
@@ -28,18 +32,20 @@ void OculusPlatformCore::_register_methods() {
   //signals (technically output methods)
   register_signal<OculusPlatformCore>((char*)"platform_initialized","success", GODOT_VARIANT_TYPE_BOOL,"error",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"get_entitlement_check_done","success", GODOT_VARIANT_TYPE_BOOL);
+  
   register_signal<OculusPlatformCore>((char*)"get_logged_in_user_done","success", GODOT_VARIANT_TYPE_BOOL,"user_id",GODOT_VARIANT_TYPE_INT,"oculus_user_id",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"get_user_done","success", GODOT_VARIANT_TYPE_BOOL,"user_id",GODOT_VARIANT_TYPE_INT,"oculus_user_id",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"get_user_token_done","success", GODOT_VARIANT_TYPE_BOOL,"user_token",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"get_user_proof_done","success", GODOT_VARIANT_TYPE_BOOL,"user_proof",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"get_user_friends_done","success", GODOT_VARIANT_TYPE_BOOL,"user_friends",GODOT_VARIANT_TYPE_ARRAY);
 
+  register_signal<OculusPlatformCore>((char*)"submit_score_to_leaderboard_done","success", GODOT_VARIANT_TYPE_BOOL);
+  register_signal<OculusPlatformCore>((char*)"get_score_from_leaderboard_done","success", GODOT_VARIANT_TYPE_BOOL,"board_rows",GODOT_VARIANT_TYPE_ARRAY);
+  
   register_signal<OculusPlatformCore>((char*)"write_cloud_data_done","success", GODOT_VARIANT_TYPE_BOOL);
   register_signal<OculusPlatformCore>((char*)"get_cloud_data_done","success", GODOT_VARIANT_TYPE_BOOL,"data",GODOT_VARIANT_TYPE_STRING);
   register_signal<OculusPlatformCore>((char*)"delete_cloud_data_done","success", GODOT_VARIANT_TYPE_BOOL);
-  register_signal<OculusPlatformCore>((char*)"get_cloud_meta_data_done","success", GODOT_VARIANT_TYPE_BOOL,"data_size",GODOT_VARIANT_TYPE_INT,
-  															"saved_time",GODOT_VARIANT_TYPE_REAL,"counter",GODOT_VARIANT_TYPE_INT,
-															"extraData",GODOT_VARIANT_TYPE_STRING,"status",GODOT_VARIANT_TYPE_STRING);
+  register_signal<OculusPlatformCore>((char*)"get_cloud_meta_data_done","success", GODOT_VARIANT_TYPE_BOOL,"cloudmetadata",GODOT_VARIANT_TYPE_DICTIONARY);
 
 }
 
@@ -157,12 +163,12 @@ void OculusPlatformCore::pumpOVRMessages() {
     //   case ovrMessage_Achievements_AddFields:
     //     processAddAchievementBitfield(message);
     //     break;
-    //   case ovrMessage_Leaderboard_WriteEntry:
-    //     processWriteLeaderboardEntry(message);
-    //     break;
-    //   case ovrMessage_Leaderboard_GetEntries:
-    //     processGetLeaderboardEntries(message);
-    //     break;
+       case ovrMessage_Leaderboard_WriteEntry:
+         processWriteLeaderboardEntry(message);
+         break;
+       case ovrMessage_Leaderboard_GetEntries:
+         processGetLeaderboardEntries(message);
+         break;
        case ovrMessage_Entitlement_GetIsViewerEntitled:
          processCheckEntitlement(message);
          break;
@@ -181,7 +187,6 @@ void OculusPlatformCore::pumpOVRMessages() {
       default:
         ALOGV("unknown OVR Platform message %d",message_type);
     }
-    //printf("\nCommand > %s", commandBuffer);
     ovr_FreeMessage(message);
   }
 }
@@ -323,7 +328,7 @@ void OculusPlatformCore::processGetLoggedInUser(ovrMessageHandle message) {
 
 
 void OculusPlatformCore::getLoggedInUserFriends() {
-  printf("\nTrying to get friends for logged in user\n");
+  ALOGV("\nTrying to get friends for logged in user\n");
 
   ovrRequest req;
 
@@ -332,35 +337,41 @@ void OculusPlatformCore::getLoggedInUserFriends() {
 
 void OculusPlatformCore::processGetFriends(ovrMessageHandle message) {
   if (!ovr_Message_IsError(message)) {
-    printf("Received get friends success\n");
-
+    ALOGV("Received get friends success\n");
     ovrUserArrayHandle users = ovr_Message_GetUserArray(message);
     generateUserArray(users);
   } else {
     const ovrErrorHandle error = ovr_Message_GetError(message);
-    printf("Received get friends failure: %s\n", ovr_Error_GetMessage(error));
-    emit_signal("get_user_freinds_done",false,NULL);
+    ALOGV("Received get friends failure: %s\n", ovr_Error_GetMessage(error));
+    emit_signal("get_user_friends_done",false,NULL);
   }
 }
 
 void OculusPlatformCore::generateUserArray(ovrUserArrayHandle users) {
   size_t nUsers = ovr_UserArray_GetSize(users);
+  Array usersfriends;
   for (size_t i = 0; i < nUsers; ++i) {
     ovrUserHandle user = ovr_UserArray_GetElement(users, i);
-    printf(
+    Dictionary userinfo;
+    userinfo["user_id"] = int(ovr_User_GetID(user));
+    userinfo["oculus_user_id"] = ovr_User_GetOculusID(user);
+    userinfo["user_action"] = ovr_User_GetPresence(user);
+    userinfo["invite_token"] = ovr_User_GetInviteToken(user);
+    usersfriends.append(userinfo);
+    ALOGV(
         "user %llu %s %s %s\n",
         ovr_User_GetID(user),
         ovr_User_GetOculusID(user),
         ovr_User_GetPresence(user),
         ovr_User_GetInviteToken(user));
   // need to make custom dictionary for godot here, then emit that 
-  // emit_signal("get_user_freinds_done",true,)
+  emit_signal("get_user_freinds_done",true,usersfriends);
   }
 }
 
 
 void OculusPlatformCore::getUserToken() {
-  printf("\nTrying to generate a user token\n");
+  ALOGV("\nTrying to generate a user token\n");
 
   ovrRequest req;
 
@@ -369,18 +380,18 @@ void OculusPlatformCore::getUserToken() {
 
 void OculusPlatformCore::processGetUserToken(ovrMessageHandle message) {
   if (!ovr_Message_IsError(message)) {
-    printf("Received user token %s\n", ovr_Message_GetString(message));
+    ALOGV("Received user token %s\n", ovr_Message_GetString(message));
     emit_signal("get_user_token_done",true,ovr_Message_GetString(message));
   } else {
     const ovrErrorHandle error = ovr_Message_GetError(message);
-    printf("Received user token failure: %s\n", ovr_Error_GetMessage(error));
+    ALOGV("Received user token failure: %s\n", ovr_Error_GetMessage(error));
     emit_signal("get_user_token_done",false,ovr_Error_GetMessage(error));
   }
 }
 
 
 void OculusPlatformCore::generateUserProof() {
-  printf("\nTrying to generate a user nonce\n");
+  ALOGV("\nTrying to generate a user nonce\n");
 
   ovrRequest req;
 
@@ -390,14 +401,104 @@ void OculusPlatformCore::generateUserProof() {
 void OculusPlatformCore::processGenerateUserProof(ovrMessageHandle message) {
   if (!ovr_Message_IsError(message)) {
     ovrUserProofHandle proof = ovr_Message_GetUserProof(message);
-    printf("Received user nonce %s\n", ovr_UserProof_GetNonce(proof));
-    emit_signal("get_user_proof_done",true,ovr_Message_GetString(message));
+    ALOGV("Received user nonce %s\n", ovr_UserProof_GetNonce(proof));
+    emit_signal("get_user_proof_done",true,ovr_UserProof_GetNonce(proof));
   } else {
     const ovrErrorHandle error = ovr_Message_GetError(message);
-    printf("Received user nonce failure: %s\n", ovr_Error_GetMessage(error));
+    ALOGV("Received user nonce failure: %s\n", ovr_Error_GetMessage(error));
     emit_signal("get_user_proof_done",false,ovr_Error_GetMessage(error));
   }
 }
+
+
+void OculusPlatformCore::writeLeaderboardEntry(String leaderboardName, String value, String extraData = "") {
+  ALOGV("\nTrying to write leaderboard entry to  %s\n", leaderboardName.alloc_c_string());
+  const char * extradata = extraData.alloc_c_string();
+  ovrRequest req;
+
+  req = ovr_Leaderboard_WriteEntry(
+      leaderboardName.alloc_c_string(), atoi(value.alloc_c_string()),extradata, sizeof(extraData.alloc_c_string()), false);
+}
+
+void OculusPlatformCore::processWriteLeaderboardEntry(ovrMessageHandle message) {
+  if (!ovr_Message_IsError(message)) {
+    ovrLeaderboardUpdateStatusHandle updateResult = ovr_Message_GetLeaderboardUpdateStatus(message);
+    if (ovr_LeaderboardUpdateStatus_GetDidUpdate(updateResult)) {
+      ALOGV("Leaderboard entry was updated.\n");
+      emit_signal("submit_score_to_leaderboard_done",true);
+    } else {
+      ALOGV("Leaderboard entry was NOT updated.\n");
+      emit_signal("submit_score_to_leaderboard_done",false);
+    }
+  } else {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received leaderboard write failure: %s\n", ovr_Error_GetMessage(error));
+    emit_signal("submit_score_to_leaderboard_done",false);
+  }
+}
+
+
+void OculusPlatformCore::getLeaderboardEntries(String leaderboardName) {
+  ALOGV("\nTrying to get leaderboard entries for  %s\n", leaderboardName.alloc_c_string());
+
+  ovrRequest req;
+
+  req = ovr_Leaderboard_GetEntries(
+      leaderboardName.alloc_c_string(),
+      10 /* limit to return */,
+      ovrLeaderboard_FilterNone,
+      ovrLeaderboard_StartAtTop);
+}
+
+void OculusPlatformCore::processGetLeaderboardEntries(ovrMessageHandle message) {
+  if (!ovr_Message_IsError(message)) {
+    ovrLeaderboardEntryArrayHandle results = ovr_Message_GetLeaderboardEntryArray(message);
+  
+    unsigned long long totalRows = ovr_LeaderboardEntryArray_GetTotalCount(results);
+    Array leaderboardvalues;
+    size_t count = ovr_LeaderboardEntryArray_GetSize(results);
+    
+    ALOGV("Total Rows in Leaderboard: %llu\n", totalRows);
+    for (size_t x = 0; x < count; x++) {
+
+      ovrLeaderboardEntryHandle entry = ovr_LeaderboardEntryArray_GetElement(results, x);
+      ovrUserHandle user = ovr_LeaderboardEntry_GetUser(entry);
+      long long score = ovr_LeaderboardEntry_GetScore(entry);
+      unsigned int ranking = ovr_LeaderboardEntry_GetRank(entry);
+      const char* extraData = ovr_LeaderboardEntry_GetExtraData(entry);
+      unsigned long long timestamp = ovr_LeaderboardEntry_GetTimestamp(entry);
+      Dictionary boardrow;
+
+      boardrow["rank"]=int(ranking);
+      boardrow["oculus_user_id"] = ovr_User_GetOculusID(user);
+      boardrow["display_name"] = ovr_User_GetDisplayName(user);
+      boardrow["score"] = int(score);
+      boardrow["extra_data"] = extraData;
+      boardrow["timestamp"] = int(timestamp);
+      
+      leaderboardvalues.append(boardrow);
+      
+      ALOGV(
+          "%d. %s %s %llu %s %llu\n",
+          ranking,
+          ovr_User_GetOculusID(user),
+          ovr_User_GetDisplayName(user),
+          score,
+          extraData,
+          timestamp);
+      
+    }
+    ALOGV("emitting signal");
+    emit_signal("get_score_from_leaderboard_done",true,leaderboardvalues);
+  } else {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received leaderboard fetch failure: %s\n", ovr_Error_GetMessage(error));
+    emit_signal("get_score_from_leaderboard_done",false,NULL);
+  }
+}
+
+
+
 
 
 // IMPORTANT NOTE:
@@ -522,11 +623,17 @@ void OculusPlatformCore::processCloudMetaData(ovrMessageHandle message) {
         ALOGV("ovrCloudStorageDataStatus_Unknown\n");
         break;
     }
-    emit_signal("get_cloud_meta_data_done",true,data_size,saved_time,counter,extraData,status);
+    Dictionary cloudmetadata;
+    cloudmetadata["data_size"] = data_size;
+    cloudmetadata["saved_time"] = saved_time;
+    cloudmetadata["counter"] = counter;
+    cloudmetadata["extraData"] = counter;
+    cloudmetadata["status"] = message;
+    emit_signal("get_cloud_meta_data_done",true,cloudmetadata);
     }
   } else {
     ALOGV("Could NOT get cloud metadata\n");
-    emit_signal("get_cloud_meta_data_done",false,NULL,NULL,NULL,NULL,NULL);
+    emit_signal("get_cloud_meta_data_done",false,NULL);
   }
 }
 

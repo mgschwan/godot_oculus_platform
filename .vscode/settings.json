@@ -3,6 +3,7 @@
 	"cmake.sourceDirectory": "${workspaceFolder}/plugin",
 	"files.associations": {
 		"string": "cpp",
-		"system_error": "cpp"
+		"system_error": "cpp",
+		"*.tcc": "cpp"
 	}
 }

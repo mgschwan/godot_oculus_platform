@@ -1,8 +1,10 @@
 extends Control
 
-export(String)  var APP_ID = "5593167750762370"
+export(String)  var APP_ID = "5593167750762370" # use your own 
 export(String)  var CLOUD_BUCKET = "testbucket"
 export(String)  var CLOUD_KEY = "testkey"
+
+var _leaderboardname = "test_board"
 var native_module
 
 const sample_data:String  = "Rahul Ghosh is storing some data here"
@@ -29,13 +31,21 @@ func _ready():
 		$OculusPlatformCore.connect("get_cloud_data_done", self, "_on_getCloudDataDone")
 		$OculusPlatformCore.connect("delete_cloud_data_done", self, "_on_deleteCloudDataDone")
 		print("Cloud setup done")
+		$OculusPlatformCore.connect("submit_score_to_leaderboard_done", self, "_on_submitScoreToLeaderboardDone")
+		$OculusPlatformCore.connect("get_score_from_leaderboard_done", self, "_on_get_scoreFromLeaderboardDone")
+		print("leaderboard setup done")
 		print ("initializing")
 		$OculusPlatformCore.initialize(APP_ID)
 	else:
 		$GridContainer/Status.text = "not available"
 		$Debug.text += "\nNot available on this platform"
 
-func _onPlatformInitialized(success,message):
+var values  = [["10","worst"],["30","middle"],["40","best"]]
+func test_leaderboard():
+	for i in values:
+		$OculusPlatformCore.submitScoreToLeaderboard(_leaderboardname,i[0],i[1])
+		
+func _on_PlatformInitialized(success,message):
 	print("signal inititlaized")
 	if not success: 
 		print("error :" ,message) 
@@ -51,27 +61,58 @@ func _on_EntitlementCheckDone(success):
 	print("successful entiltemnt_check , success = " ,success)
 	print ("trying to get user")
 	$OculusPlatformCore.getLoggedInUser()
+	
+	
 		
 func _on_getLoggedInUserDone(success,userid,oculus_user_id):
 	print("successful get_user , success = " ,success,  " user_id = ", userid  , " oculus_user_id = ", oculus_user_id )
-	
-	$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY,sample_data,"Testdata")
+	$OculusPlatformCore.getUserToken()
+	$OculusPlatformCore.getUserProof()
+	$OculusPlatformCore.getScoreFromLeaderboard(_leaderboardname)
+	$OculusPlatformCore.getLoggedInUserFriends()
+	#test_leaderboard()
+	#$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY,sample_data,"Testdata")
 
 func _on_getUserTokenDone(success,message):
 	if not success:
 		print("get User Token fail , error:",message)
 		return
 	print("user token is ",message)
+	
 func _on_getUserProofDone(success,message):
 	if not success:
 		print("get User Proof fail, error:",message)
 		return
 	print("user proof is ",message)
+	
 func _on_getUserFriendsDone(success,friends_array):
 	if not success:
 		print("get User friends fail")
 		return
 	# not implemented yet
+
+var total_rows = 0
+
+func _on_submitScoreToLeaderboardDone(success):
+	if not success:
+		print("leaderboard entry fail")
+		return
+	total_rows +=1
+	print("final rows entered = ",total_rows)
+	if total_rows == len(values):
+		pass
+
+func _on_get_scoreFromLeaderboardDone(success,leaderboard_rows):
+	print("score retrive signal")
+	if not success:
+		print("leaderboard retrival fail")
+		return 
+	
+	print(leaderboard_rows)
+
+
+
+
 
 # cloud functions ( dont work , bcz functions in sdk not implemented for android )
 
