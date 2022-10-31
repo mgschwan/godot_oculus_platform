@@ -13,7 +13,8 @@
 #include <gdnative_api_struct.gen.h>
 #include <core/Godot.hpp>
 #include <core/GodotGlobal.hpp>
-
+#include <string>
+#include <cstdlib>
 // Include the OVR SDK
 #define DEBUG 1
 #define LOG_TAG "GodotOVRPlatform"

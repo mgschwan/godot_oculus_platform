@@ -22,6 +22,7 @@ func _ready():
 		$OculusPlatformCore.connect("get_entitlement_check_done", self, "_on_EntitlementCheckDone")
 		print("entitlement setup done")
 		$OculusPlatformCore.connect("get_logged_in_user_done", self, "_on_getLoggedInUserDone")
+		$OculusPlatformCore.connect("get_user_done", self, "_on_getUserDone")
 		$OculusPlatformCore.connect("get_user_token_done", self, "_on_getUserTokenDone")
 		$OculusPlatformCore.connect("get_user_proof_done", self, "_on_getUserProofDone")
 		$OculusPlatformCore.connect("get_user_friends_done", self, "_on_getUserFriendsDone")
@@ -34,81 +35,107 @@ func _ready():
 		$OculusPlatformCore.connect("submit_score_to_leaderboard_done", self, "_on_submitScoreToLeaderboardDone")
 		$OculusPlatformCore.connect("get_score_from_leaderboard_done", self, "_on_get_scoreFromLeaderboardDone")
 		print("leaderboard setup done")
+		$OculusPlatformCore.connect("create_and_join_private_room_done",self,"_on_create_and_join_private_room_done")
+		$OculusPlatformCore.connect("get_current_room_done",self,"_on_get_current_room_done")
+		$OculusPlatformCore.connect("leave_room_done",self,"_on_leave_room_done")
+		$OculusPlatformCore.connect("join_room_done",self,"_on_join_room_done")
+		$OculusPlatformCore.connect("kick_user_done",self,"_on_kick_user_done")
+		$OculusPlatformCore.connect("get_invitable_users_done",self,"_on_get_invitable_users_done")
+		$OculusPlatformCore.connect("invite_user_done",self,"_on_invite_user_done")
+		$OculusPlatformCore.connect("set_room_description_done",self,"_on_set_room_description_done")
+		print("room setup done")
 		print ("initializing")
 		$OculusPlatformCore.initialize(APP_ID)
 	else:
 		$GridContainer/Status.text = "not available"
 		$Debug.text += "\nNot available on this platform"
 
-var values  = [["10","worst"],["30","middle"],["40","best"]]
+var values  = [["40","best"]]
 func test_leaderboard():
 	for i in values:
 		$OculusPlatformCore.submitScoreToLeaderboard(_leaderboardname,i[0],i[1])
 		
-func _on_PlatformInitialized(success,message):
-	print("signal inititlaized")
-	if not success: 
-		print("error :" ,message) 
+func _on_PlatformInitialized(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	$Debug.text += "\nTry to get entitlement"
 	print ("Try to get entitlement")
 	$OculusPlatformCore.checkEntitlement()
 		
-func _on_EntitlementCheckDone(success):
-	print("signal entitlement")
-	if not success: 
+func _on_EntitlementCheckDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
-	print("successful entiltemnt_check , success = " ,success)
 	print ("trying to get user")
 	$OculusPlatformCore.getLoggedInUser()
 	
-	
-		
-func _on_getLoggedInUserDone(success,userid,oculus_user_id):
-	print("successful get_user , success = " ,success,  " user_id = ", userid  , " oculus_user_id = ", oculus_user_id )
-	$OculusPlatformCore.getUserToken()
-	$OculusPlatformCore.getUserProof()
-	$OculusPlatformCore.getScoreFromLeaderboard(_leaderboardname)
-	$OculusPlatformCore.getLoggedInUserFriends()
-	#test_leaderboard()
-	#$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY,sample_data,"Testdata")
 
-func _on_getUserTokenDone(success,message):
-	if not success:
-		print("get User Token fail , error:",message)
+func _on_getLoggedInUserDone(response):
+	print("login user response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
-	print("user token is ",message)
-	
-func _on_getUserProofDone(success,message):
-	if not success:
-		print("get User Proof fail, error:",message)
+	var uid =  response["user_id"]
+	$OculusPlatformCore.getUser(uid)
+	#$OculusPlatformCore.getUserToken()
+	#$OculusPlatformCore.getUserProof()
+	#$OculusPlatformCore.getScoreFromLeaderboard(_leaderboardname,10)
+	#$OculusPlatformCore.getLoggedInUserFriends()
+	#test_leaderboard()
+	#$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY	,sample_data,"Testdata")
+
+func _on_getUserDone(response):
+	print("get user response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
-	print("user proof is ",message)
+	$OculusPlatformCore.getLoggedInUserFriends()
 	
-func _on_getUserFriendsDone(success,friends_array):
-	if not success:
-		print("get User friends fail")
+func _on_create_and_join_private_room_done(response):
+	print("get user response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+
+func _on_getUserTokenDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	
+func _on_getUserProofDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	
+func _on_getUserFriendsDone(response):
+	print("friends respone: ", response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	# not implemented yet
 
 var total_rows = 0
 
-func _on_submitScoreToLeaderboardDone(success):
-	if not success:
-		print("leaderboard entry fail")
+func _on_submitScoreToLeaderboardDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	total_rows +=1
 	print("final rows entered = ",total_rows)
 	if total_rows == len(values):
 		pass
 
-func _on_get_scoreFromLeaderboardDone(success,leaderboard_rows):
-	print("score retrive signal")
-	if not success:
-		print("leaderboard retrival fail")
-		return 
-	
-	print(leaderboard_rows)
+func _on_get_scoreFromLeaderboardDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
 
 
 
@@ -119,33 +146,35 @@ func _on_get_scoreFromLeaderboardDone(success,leaderboard_rows):
 
 
 
-func _on_writeCloudDataDone(success):
-	if not success:
-		print("save unsuccessful")
+func _on_writeCloudDataDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	print("save was successful")
 	
 	$OculusPlatformCore.getCloudMetaData(CLOUD_BUCKET)
 	
-func _on_getCloudMetaDataDone(success,data_size,saved_time,counter,extradata,status):
-	if not success:
-		print("get Cloud Meta Data unsuccessful")
+func _on_getCloudMetaDataDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	print("get metadata was successful")
-	print("data size = ",data_size ," saved_time = ",saved_time," counter = ",counter," extradata = ",extradata," status = ",status )
 	
 	$OculusPlatformCore.getCloudData(CLOUD_BUCKET,CLOUD_KEY)
 	
-func _on_getCloudDataDone(success,loaded_data):
-	if not success:
-		print("get Cloud Data unsuccessful")
+func _on_getCloudDataDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
-	print("load succesful , data = ",loaded_data)
-	
+
 	$OculusPlatformCore.deleteCloudData(CLOUD_BUCKET,CLOUD_KEY)
 
-func _on_deleteCloudDataDone(success):
-	if not success:
-		print("delete Cloud Data unsuccessful")
+func _on_deleteCloudDataDone(response):
+	print(response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
 		return
 	print("delete successful")
