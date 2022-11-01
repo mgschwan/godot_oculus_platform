@@ -4,6 +4,7 @@ export(String)  var APP_ID = "5593167750762370" # use your own
 export(String)  var CLOUD_BUCKET = "testbucket"
 export(String)  var CLOUD_KEY = "testkey"
 
+var ACHIEVEMENT_NAME = "Test_Achievement"
 var _leaderboardname = "test_board"
 var native_module
 
@@ -35,15 +36,23 @@ func _ready():
 		$OculusPlatformCore.connect("submit_score_to_leaderboard_done", self, "_on_submitScoreToLeaderboardDone")
 		$OculusPlatformCore.connect("get_score_from_leaderboard_done", self, "_on_get_scoreFromLeaderboardDone")
 		print("leaderboard setup done")
-		$OculusPlatformCore.connect("create_and_join_private_room_done",self,"_on_create_and_join_private_room_done")
-		$OculusPlatformCore.connect("get_current_room_done",self,"_on_get_current_room_done")
-		$OculusPlatformCore.connect("leave_room_done",self,"_on_leave_room_done")
-		$OculusPlatformCore.connect("join_room_done",self,"_on_join_room_done")
-		$OculusPlatformCore.connect("get_invitable_users_done",self,"_on_get_invitable_users_done")
-		$OculusPlatformCore.connect("set_room_description_done",self,"_on_set_room_description_done")
-		$OculusPlatformCore.connect("update_room_datastore_done",self,"_on_update_room_datastore_done")
-		$OculusPlatformCore.connect("room_update_done",self,"_on_room_update_done")
+		$OculusPlatformCore.connect("create_and_join_private_room_done",self,"_on_createAndJoinPrivateRoomDone")
+		$OculusPlatformCore.connect("get_current_room_done",self,"_on_getCurrentRoomDone")
+		$OculusPlatformCore.connect("leave_room_done",self,"_on_leaveRoomDone")
+		$OculusPlatformCore.connect("join_room_done",self,"_on_joinRoomDone")
+		$OculusPlatformCore.connect("get_invitable_users_done",self,"_on_getInvitableUsersDone")
+		$OculusPlatformCore.connect("set_room_description_done",self,"_on_setRoomDescriptionDone")
+		$OculusPlatformCore.connect("update_room_datastore_done",self,"_on_updateRoomDatastoreDone")
+		$OculusPlatformCore.connect("room_update_done",self,"_on_roomUpdateDone")
 		print("room setup done")
+		$OculusPlatformCore.connect("get_all_achievement_definition",self,"_on_getAllAchievementDefinitionDone")
+		$OculusPlatformCore.connect("get_all_achievement_progress",self,"_on_getAllAchievementProgressDone")
+		$OculusPlatformCore.connect("get_achievement_definition",self,"_on_getAchievementDefinitionDone")
+		$OculusPlatformCore.connect("get_achievement_progress",self,"_on_getAchievementProgressDone")
+		$OculusPlatformCore.connect("unlock_achievement",self,"_on_unlockAchievementDone")
+		$OculusPlatformCore.connect("add_achievement_count",self,"_on_addAchievementCountDone")
+		$OculusPlatformCore.connect("add_achievement_bitfield",self,"_on_addAchievementBitfieldDone")
+		print("achievement setup done")
 		print ("initializing")
 		$OculusPlatformCore.initialize(APP_ID)
 	else:
@@ -71,7 +80,12 @@ func _on_EntitlementCheckDone(response):
 		return
 	print ("trying to get user")
 	$OculusPlatformCore.getLoggedInUser()
-	
+
+func _on_getUserDone(response):
+	print("get user response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
 
 func _on_getLoggedInUserDone(response):
 	print("login user response ",response)
@@ -79,26 +93,66 @@ func _on_getLoggedInUserDone(response):
 		print("error :" ,response["error"]) 
 		return
 	var uid =  response["user_id"]
-	$OculusPlatformCore.getUser(uid)
+	#$OculusPlatformCore.getUser(uid)
 	#$OculusPlatformCore.getUserToken()
 	#$OculusPlatformCore.getUserProof()
 	#$OculusPlatformCore.getScoreFromLeaderboard(_leaderboardname,10)
 	#$OculusPlatformCore.getLoggedInUserFriends()
 	#test_leaderboard()
 	#$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY	,sample_data,"Testdata")
-
+	#$OculusPlatformCore.createAndJoinPrivateRoom("NONE",2,true)
+	$OculusPlatformCore.addAchievementCount(ACHIEVEMENT_NAME,"3")
+	
 #NONE EVERYONE FRIENDS_OF_MEMBERS FRIENDS_OF_OWNER INVITED_USERS
-func _on_getUserDone(response):
-	print("get user response ",response)
+func _on_getAllAchievementDefinitionDone(response):
+	print("all Achievement ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
-	$OculusPlatformCore.createAndJoinPrivateRoom("NONE",2,true)
+	$OculusPlatformCore.getAllAchievementProgress()
 	
+func _on_getAllAchievementProgressDone(response):
+	print("all Achievement progress ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	print("unlocking count achievement by adding 8 points")
+	$OculusPlatformCore.addAchievementCount(ACHIEVEMENT_NAME,"8")
+
+func _on_getAchievementDefinitionDone(response):
+	print("Achievement ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
 	
+func _on_getAchievementProgressDone(response):
+	print("Achievement progress ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+		
+func _on_unlockAchievementDone(response):
+	print("Achievement unlock response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+		
+func _on_addAchievementCountDone(response):
+	print("Achievement count response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	$OculusPlatformCore.getAllAchievementDefinition()
+	
+func _on_addAchievementBitfieldDone(response):
+	print("Achievement Bitfield response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+
 var ROOMID:String 
 
-func _on_create_and_join_private_room_done(response):
+func _on_createAndJoinPrivateRoomDone(response):
 	print("create room response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
@@ -109,25 +163,25 @@ func _on_create_and_join_private_room_done(response):
 	$OculusPlatformCore.updateRoomDatastore(ROOMID,"Testkey","Testvalue")
 	$OculusPlatformCore.joinRoom(ROOMID)
 
-func _on_update_room_datastore_done(response):
+func _on_updateRoomDatastoreDone(response):
 	print("set room description response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 
-func _on_room_update_done(response):
+func _on_roomUpdateDone(response):
 	print("set room update response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 
-func _on_set_room_description_done(response):
+func _on_setRoomDescriptionDone(response):
 	print("set room description response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 
-func _on_join_room_done(response):
+func _on_joinRoomDone(response):
 	print("join room response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
@@ -135,26 +189,26 @@ func _on_join_room_done(response):
 	$OculusPlatformCore.getCurrentRoom()
 	$OculusPlatformCore.getInvitableUsers()
 
-func _on_get_current_room_done(response):
+func _on_getCurrentRoomDone(response):
 	print("get room response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 	
-	
-func _on_get_invitable_users_done(response):
+func _on_getInvitableUsersDone(response):
 	print("get invitable users response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 	$OculusPlatformCore.leaveRoom(ROOMID)
 	
-func _on_leave_room_done(response):
+func _on_leaveRoomDone(response):
 	print("get leave room response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 	$OculusPlatformCore.getCurrentRoom()
+
 func _on_getUserTokenDone(response):
 	print(response)
 	if not response["success"]: 
@@ -173,7 +227,6 @@ func _on_getUserFriendsDone(response):
 		print("error :" ,response["error"]) 
 		return
 	# not implemented yet
-
 var total_rows = 0
 
 func _on_submitScoreToLeaderboardDone(response):
@@ -191,7 +244,8 @@ func _on_get_scoreFromLeaderboardDone(response):
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
-		
+
+
 # cloud functions ( dont work , bcz functions in sdk not implemented for android )
 func _on_writeCloudDataDone(response):
 	print(response)

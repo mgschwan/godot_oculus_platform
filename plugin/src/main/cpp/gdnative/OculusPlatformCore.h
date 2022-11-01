@@ -16,8 +16,10 @@ namespace godot {
 
 	private:
 		void initializePlatform(char * app_id, jobject activity);
-		void outputRoomDetails(ovrRoomHandle room,Dictionary &response);
-		void generateUserArray(ovrUserArrayHandle users,Dictionary &response);		
+		void generateRoomDetails(ovrRoomHandle room,Dictionary &response);
+		void generateUserArray(ovrUserArrayHandle users,Dictionary &response);
+		void generateAchievementsArray(ovrAchievementDefinitionArrayHandle achievements,Dictionary &response);		
+		void generateProgressArray(ovrAchievementProgressArrayHandle achievements,Dictionary &response);		
 
 	public:
 		static void _register_methods();
@@ -51,6 +53,14 @@ namespace godot {
 		void writeLeaderboardEntry(String leaderboardName, String value,String extraData,bool forceupdate);
   		void getLeaderboardEntries(String leaderboardName, int limit = 10);
 
+		void getAllAchievementDefinition();
+		void getAllAchievementProgress();
+		void getAchievementDefinition(String cheevoName);
+		void getAchievementProgress(String cheevoName);
+		void unlockAchievement(String cheevoName);
+		void addAchievementCount(String cheevoName, String value);
+		void addAchievementBitfield(String cheevoName, String value);
+
 		void writeCloudData(const String cloud_bucket, const String cloud_key, const Dictionary data, String extra, int counter);
 		void getCloudData(const String cloud_bucket, const String cloud_key);
 		void deleteCloudData(const String cloud_bucket, const String cloud_key);
@@ -80,6 +90,14 @@ namespace godot {
 
 		void processWriteLeaderboardEntry(ovrMessageHandle message);
   		void processGetLeaderboardEntries(ovrMessageHandle message);
+
+		void processGetAllAchievementDefinition(ovrMessageHandle message);
+		void processGetAllAchievementProgress(ovrMessageHandle message);
+		void processGetAchievementDefinition(ovrMessageHandle message);
+		void processGetAchievementProgress(ovrMessageHandle message);
+		void processUnlockAchievement(ovrMessageHandle message);
+		void processAddAchievementCount(ovrMessageHandle message);
+		void processAddAchievementBitfield(ovrMessageHandle message);
 
 		void processCloudStorageLoad(ovrMessageHandle message);
 		void processCloudStorageSave(ovrMessageHandle message);

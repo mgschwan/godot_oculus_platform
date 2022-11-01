@@ -35,24 +35,34 @@ void OculusPlatformCore::_register_methods()
   register_method("inviteUser", &OculusPlatformCore::inviteUser);
   register_method("setRoomDescription", &OculusPlatformCore::setRoomDescription);
 
+  register_method("getAllAchievementDefinition", &OculusPlatformCore::getAllAchievementDefinition);
+  register_method("getAllAchievementProgress", &OculusPlatformCore::getAllAchievementProgress);
+  register_method("getAchievementDefinition", &OculusPlatformCore::getAchievementDefinition);
+  register_method("getAchievementProgress", &OculusPlatformCore::getAchievementProgress);
+  register_method("unlockAchievement", &OculusPlatformCore::unlockAchievement);
+  register_method("addAchievementCount", &OculusPlatformCore::addAchievementCount);
+  register_method("addAchievementBitfield", &OculusPlatformCore::addAchievementBitfield);
+
   register_method("writeCloudData", &OculusPlatformCore::writeCloudData);
   register_method("getCloudData", &OculusPlatformCore::getCloudData);
   register_method("deleteCloudData", &OculusPlatformCore::deleteCloudData);
   register_method("getCloudMetaData", &OculusPlatformCore::getCloudMetaData);
-  register_method("updateRoomDatastore",&OculusPlatformCore::updateRoomDataStore);
+  register_method("updateRoomDatastore", &OculusPlatformCore::updateRoomDataStore);
   // signals (technically output methods)
+
+  // core signals
   register_signal<OculusPlatformCore>((char *)"platform_initialized", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_entitlement_check_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
-
+  // user signals
   register_signal<OculusPlatformCore>((char *)"get_logged_in_user_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_user_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_user_token_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_user_proof_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_user_friends_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
-
+  // leaderboard signals
   register_signal<OculusPlatformCore>((char *)"submit_score_to_leaderboard_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_score_from_leaderboard_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
-
+  // room signals
   register_signal<OculusPlatformCore>((char *)"create_and_join_private_room_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_current_room_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"leave_room_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
@@ -63,7 +73,15 @@ void OculusPlatformCore::_register_methods()
   register_signal<OculusPlatformCore>((char *)"set_room_description_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"update_room_datastore_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"room_update_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
-
+  // achievement signals
+  register_signal<OculusPlatformCore>((char *)"get_all_achievement_definition", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"get_all_achievement_progress", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"get_achievement_definition", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"get_achievement_progress", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"unlock_achievement", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"add_achievement_count", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"add_achievement_bitfield", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  // cloud signals
   register_signal<OculusPlatformCore>((char *)"write_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"delete_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
@@ -149,21 +167,27 @@ void OculusPlatformCore::pumpOVRMessages()
     case ovrMessage_User_GetAccessToken:
       processGetUserToken(message);
       break;
-      //   case ovrMessage_Achievements_GetDefinitionsByName:
-      //     processGetAchievementDefinition(message);
-      //     break;
-      //   case ovrMessage_Achievements_GetProgressByName:
-      //     processGetAchievementProgress(message);
-      //     break;
-      //   case ovrMessage_Achievements_Unlock:
-      //     processUnlockAchievement(message);
-      //     break;
-      //   case ovrMessage_Achievements_AddCount:
-      //     processAddAchievementCount(message);
-      //     break;
-      //   case ovrMessage_Achievements_AddFields:
-      //     processAddAchievementBitfield(message);
-      //     break;
+    case ovrMessage_Achievements_GetAllDefinitions:
+      processGetAllAchievementDefinition(message);
+      break;
+    case ovrMessage_Achievements_GetDefinitionsByName:
+      processGetAchievementDefinition(message);
+      break;
+    case ovrMessage_Achievements_GetAllProgress:
+      processGetAllAchievementProgress(message);
+      break;
+    case ovrMessage_Achievements_GetProgressByName:
+      processGetAchievementProgress(message);
+      break;
+    case ovrMessage_Achievements_Unlock:
+      processUnlockAchievement(message);
+      break;
+    case ovrMessage_Achievements_AddCount:
+      processAddAchievementCount(message);
+      break;
+    case ovrMessage_Achievements_AddFields:
+      processAddAchievementBitfield(message);
+      break;
     case ovrMessage_Leaderboard_WriteEntry:
       processWriteLeaderboardEntry(message);
       break;
@@ -374,7 +398,6 @@ void OculusPlatformCore::processGetFriends(ovrMessageHandle message)
     ALOGV("Received get friends success\n");
     ovrUserArrayHandle users = ovr_Message_GetUserArray(message);
     generateUserArray(users, response);
-
   }
   else
   {
@@ -389,7 +412,7 @@ void OculusPlatformCore::generateUserArray(ovrUserArrayHandle users, Dictionary 
   ALOGV("in generateUserArray success\n");
 
   size_t nUsers = ovr_UserArray_GetSize(users);
-  ALOGV("friends %u \n",nUsers);
+  ALOGV("friends %u \n", nUsers);
   response["count"] = int(nUsers);
   Array usersfriends;
   for (size_t i = 0; i < nUsers; ++i)
@@ -467,7 +490,7 @@ void OculusPlatformCore::processGenerateUserProof(ovrMessageHandle message)
 
 #pragma endregion
 
-// Leaderboard Functions
+//  Leaderboard Functions
 #pragma region leaderboard functions
 void OculusPlatformCore::writeLeaderboardEntry(String leaderboardName, String value, String extraData = "", bool forceUpdate = false)
 {
@@ -564,9 +587,9 @@ void OculusPlatformCore::processGetLeaderboardEntries(ovrMessageHandle message)
 // Room join modes are
 // NONE EVERYONE FRIENDS_OF_MEMBERS FRIENDS_OF_OWNER INVITED_USERS
 void OculusPlatformCore::createAndJoinPrivateRoom(String joinType, unsigned int maxUsers, bool subscribetoupdates)
-{ 
+{
   ovrRoomJoinPolicy join_type = ovrRoomJoinPolicy_FromString(joinType.alloc_c_string());
-  ALOGV("\nTrying to get create and join private room %d\n",join_type);
+  ALOGV("\nTrying to get create and join private room %d\n", join_type);
   ovrRequest req;
 
   req = ovr_Room_CreateAndJoinPrivate(join_type, maxUsers, subscribetoupdates);
@@ -580,7 +603,7 @@ void OculusPlatformCore::processCreateAndJoinPrivateRoom(ovrMessageHandle messag
   {
     ALOGV("Created and joined private room\n");
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -609,7 +632,7 @@ void OculusPlatformCore::processGetCurrentRoom(ovrMessageHandle message)
     ALOGV("Received get current room success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -639,7 +662,7 @@ void OculusPlatformCore::processGetRoom(ovrMessageHandle message)
     ALOGV("Received get room success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -670,7 +693,7 @@ void OculusPlatformCore::processLeaveRoom(ovrMessageHandle message)
     ALOGV("Received leave room success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -700,7 +723,7 @@ void OculusPlatformCore::processJoinRoom(ovrMessageHandle message)
     ALOGV("Received join room success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -731,7 +754,7 @@ void OculusPlatformCore::processKickUser(ovrMessageHandle message)
     ALOGV("Received kick user success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -790,7 +813,7 @@ void OculusPlatformCore::processInviteUser(ovrMessageHandle message)
     ALOGV("Received invite user success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
   }
   else
   {
@@ -820,7 +843,7 @@ void OculusPlatformCore::processSetRoomDescription(ovrMessageHandle message)
     ALOGV("Received set description success\n");
 
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
+    generateRoomDetails(room, response);
     ovrUserArrayHandle users = ovr_Room_GetUsers(room);
     generateUserArray(users, response);
   }
@@ -834,10 +857,11 @@ void OculusPlatformCore::processSetRoomDescription(ovrMessageHandle message)
 }
 
 // send null value with key to remove key
-void OculusPlatformCore::updateRoomDataStore(String roomID, String key, String value) {
-  
+void OculusPlatformCore::updateRoomDataStore(String roomID, String key, String value)
+{
+
   ovrID room_id = std::strtoull(roomID.alloc_c_string(), NULL, 10);
-  printf("\nTrying to update data store for room %llu\n", room_id);
+  ALOGV("\nTrying to update data store for room %llu\n", room_id);
   ovrRequest req;
 
   ovrKeyValuePair newKVPair;
@@ -848,37 +872,45 @@ void OculusPlatformCore::updateRoomDataStore(String roomID, String key, String v
   req = ovr_Room_UpdateDataStore(room_id, &newKVPair, 1);
 }
 
-void OculusPlatformCore::processUpdateRoomDataStore(ovrMessageHandle message) {
+void OculusPlatformCore::processUpdateRoomDataStore(ovrMessageHandle message)
+{
   Dictionary response;
   response["success"] = !ovr_Message_IsError(message);
-  if(response["success"]){
-    printf("Received update data store success\n");
+  if (response["success"])
+  {
+    ALOGV("Received update data store success\n");
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room,response);
-  } else {
+    generateRoomDetails(room, response);
+  }
+  else
+  {
     const ovrErrorHandle error = ovr_Message_GetError(message);
-    printf("Received update room data failure: %s\n", ovr_Error_GetMessage(error));
+    ALOGV("Received update room data failure: %s\n", ovr_Error_GetMessage(error));
     response["error"] = ovr_Error_GetMessage(error);
   }
   emit_signal("update_room_datastore_done", response);
 }
 
-void OculusPlatformCore::processRoomUpdate(ovrMessageHandle message) {
+void OculusPlatformCore::processRoomUpdate(ovrMessageHandle message)
+{
   Dictionary response;
   response["success"] = !ovr_Message_IsError(message);
-  if(response["success"]){
-    printf("Received room update Notification\n");
+  if (response["success"])
+  {
+    ALOGV("Received room update Notification\n");
     ovrRoomHandle room = ovr_Message_GetRoom(message);
-    outputRoomDetails(room, response);
-  } else {
+    generateRoomDetails(room, response);
+  }
+  else
+  {
     const ovrErrorHandle error = ovr_Message_GetError(message);
-    printf("Received room update failure: %s\n", ovr_Error_GetMessage(error));
+    ALOGV("Received room update failure: %s\n", ovr_Error_GetMessage(error));
     response["error"] = ovr_Error_GetMessage(error);
   }
   emit_signal("room_update_done", response);
 }
 
-void OculusPlatformCore::outputRoomDetails(ovrRoomHandle room, Dictionary &response)
+void OculusPlatformCore::generateRoomDetails(ovrRoomHandle room, Dictionary &response)
 {
   Dictionary _roomdetails;
 
@@ -888,13 +920,13 @@ void OculusPlatformCore::outputRoomDetails(ovrRoomHandle room, Dictionary &respo
   response["room_details"] = _roomdetails;
 
   size_t maxUsers = ovr_Room_GetMaxUsers(room);
-  
+
   response["max_users"] = int(maxUsers);
 
   ovrUserHandle owner = ovr_Room_GetOwner(room);
 
   Dictionary _owner;
-  
+
   _owner["user_id"] = String::num_int64(ovr_User_GetID(owner));
   _owner["oculus_id"] = ovr_User_GetOculusID(owner);
   response["owner"] = _owner;
@@ -911,6 +943,243 @@ void OculusPlatformCore::outputRoomDetails(ovrRoomHandle room, Dictionary &respo
     _datastore_dict[key] = ovr_DataStore_GetValue(dataStore, key);
   }
   response["datastore"] = _datastore_dict;
+}
+
+#pragma endregion
+
+// Achievement functions
+#pragma region achievements functions
+
+void OculusPlatformCore::getAllAchievementDefinition()
+{
+  ALOGV("\nTrying to get definition for all achievement");
+
+  ovrRequest req;
+
+  req = ovr_Achievements_GetAllDefinitions();
+}
+
+void OculusPlatformCore::processGetAllAchievementDefinition(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (response["success"])
+  {
+    ovrAchievementDefinitionArrayHandle cheevos = ovr_Message_GetAchievementDefinitionArray(message);
+    generateAchievementsArray(cheevos, response);
+  }
+  else
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received get achievement definition failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("get_all_achievement_definition", response);
+}
+
+void OculusPlatformCore::getAchievementDefinition(String cheevoName)
+{
+  ALOGV("\nTrying to get definition for achievement %s\n", cheevoName.alloc_c_string());
+  char *cheevo_name = cheevoName.alloc_c_string();
+  ovrRequest req;
+
+  req = ovr_Achievements_GetDefinitionsByName((const char **)&cheevo_name, 1);
+}
+
+void OculusPlatformCore::processGetAchievementDefinition(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (response["success"])
+  {
+    ovrAchievementDefinitionArrayHandle cheevos = ovr_Message_GetAchievementDefinitionArray(message);
+  }
+  else
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received get achievement definition failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("get_achievement_definition", response);
+}
+
+void OculusPlatformCore::getAllAchievementProgress()
+{
+  ALOGV("\nTrying to get progress for all achievement");
+
+  ovrRequest req;
+
+  req = ovr_Achievements_GetAllProgress();
+}
+
+void OculusPlatformCore::processGetAllAchievementProgress(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (response["success"])
+  {
+    ovrAchievementProgressArrayHandle cheevos = ovr_Message_GetAchievementProgressArray(message);
+    generateProgressArray(cheevos, response);
+  }
+  else
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received get achievement progress failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("get_all_achievement_progress", response);
+}
+
+void OculusPlatformCore::getAchievementProgress(String cheevoName)
+{
+  ALOGV("\nTrying to get progress for achievement %s\n", cheevoName.alloc_c_string());
+  char *cheevo_name = cheevoName.alloc_c_string();
+  ovrRequest req;
+
+  req = ovr_Achievements_GetProgressByName((const char **)&cheevo_name, 1);
+}
+
+void OculusPlatformCore::processGetAchievementProgress(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (response["success"])
+  {
+    ovrAchievementProgressArrayHandle cheevos = ovr_Message_GetAchievementProgressArray(message);
+    generateProgressArray(cheevos, response);
+  }
+  else
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received get achievement progress failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("get_achievement_progress", response);
+}
+
+void OculusPlatformCore::unlockAchievement(String cheevoName)
+{
+  ALOGV("\nTrying to unlock achievement %s\n", cheevoName.alloc_c_string());
+
+  ovrRequest req;
+
+  req = ovr_Achievements_Unlock((const char *)cheevoName.alloc_c_string());
+}
+
+void OculusPlatformCore::processUnlockAchievement(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (!response["success"])
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received unlock achievement failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("unlock_achievement", response);
+}
+
+void OculusPlatformCore::addAchievementCount(String cheevoName, String value)
+{
+  ALOGV("\nTrying to add %lld to achievement %s\n", std::strtoull(value.alloc_c_string(), NULL, 10), cheevoName.alloc_c_string());
+
+  ovrRequest req;
+
+  req = ovr_Achievements_AddCount((const char *)cheevoName.alloc_c_string(), std::strtoull(value.alloc_c_string(), NULL, 10));
+}
+
+void OculusPlatformCore::processAddAchievementCount(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (!response["success"])
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received add count achievement failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("add_achievement_count", response);
+}
+
+void OculusPlatformCore::addAchievementBitfield(String cheevoName, String value)
+{
+  ALOGV("\nTrying to add %s to achievement %s\n", value.alloc_c_string(), cheevoName.alloc_c_string());
+
+  ovrRequest req;
+
+  req = ovr_Achievements_AddFields((const char *)cheevoName.alloc_c_string(), (const char *)value.alloc_c_string());
+}
+
+void OculusPlatformCore::processAddAchievementBitfield(ovrMessageHandle message)
+{
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if (!response["success"])
+  {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    ALOGV("Received add field achievement failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("add_achievement_bitfield", response);
+}
+
+void OculusPlatformCore::generateAchievementsArray(ovrAchievementDefinitionArrayHandle cheevos, Dictionary &response)
+{
+
+  size_t nAchievements = ovr_AchievementDefinitionArray_GetSize(cheevos);
+  response["count"] = nAchievements;
+  Array achievements;
+  Dictionary achievement;
+  for (size_t i = 0; i < nAchievements; ++i)
+  {
+
+    ovrAchievementDefinitionHandle singleCheevo = ovr_AchievementDefinitionArray_GetElement(cheevos, i);
+    ovrAchievementType achievementType = ovr_AchievementDefinition_GetType(singleCheevo);
+    achievement["type"] = ovrAchievementType_ToString(achievementType);
+    switch (achievementType)
+    {
+    case ovrAchievement_TypeSimple:
+      break;
+
+    case ovrAchievement_TypeBitfield:
+      achievement["bitfield_length"] = ovr_AchievementDefinition_GetBitfieldLength(singleCheevo);
+      achievement["achievement_target"] = String::num_int64(ovr_AchievementDefinition_GetTarget(singleCheevo));
+      break;
+
+    case ovrAchievement_TypeCount:
+      achievement["achievement_target"] = String::num_int64(ovr_AchievementDefinition_GetTarget(singleCheevo));
+      break;
+
+    case ovrAchievement_TypeUnknown:
+      break;
+    default:
+      ALOGV("Type: Unknown\n");
+      break;
+    }
+
+    achievements.append(achievement);
+  }
+  response["achievements"] = achievements;
+}
+
+void OculusPlatformCore::generateProgressArray(ovrAchievementProgressArrayHandle cheevos, Dictionary &response)
+{
+  size_t nProgress = ovr_AchievementProgressArray_GetSize(cheevos);
+  response["count"] = nProgress;
+  Array progresses;
+  Dictionary progress;
+  for (size_t i = 0; i < nProgress; ++i)
+  {
+    ovrAchievementProgressHandle singleCheevo = ovr_AchievementProgressArray_GetElement(cheevos, 0);
+    progress["achievement_name"] = ovr_AchievementProgress_GetName(singleCheevo);
+    progress["unlocked"] = ovr_AchievementProgress_GetIsUnlocked(singleCheevo);
+    if (progress["unlocked"])
+      progress["unlock_time"] = int(ovr_AchievementProgress_GetUnlockTime(singleCheevo));
+    progress["bitField"] = ovr_AchievementProgress_GetBitfield(singleCheevo);
+    progress["value"] = int(ovr_AchievementProgress_GetCount(singleCheevo));
+    progresses.append(progress);
+  }
+  response["progresses"] = progresses;
 }
 
 #pragma endregion
