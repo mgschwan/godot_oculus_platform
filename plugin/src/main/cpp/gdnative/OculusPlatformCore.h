@@ -30,7 +30,7 @@ namespace godot {
 		//command functions
 		void initialize(const String appId, bool async);
 		
-		void createAndJoinPrivateRoom(String joinType, unsigned int maxUsers);
+		void createAndJoinPrivateRoom(String joinType, unsigned int maxUsers, bool subscribetoupdates = false);
 		void getCurrentRoom();
 		void getRoom(String roomID);
 		void leaveRoom(String roomID);
@@ -39,6 +39,7 @@ namespace godot {
 		void getInvitableUsers();
 		void inviteUser(String roomID, String inviteToken);
 		void setRoomDescription(String roomID,String description);
+		void updateRoomDataStore(String roomID, String key, String value);
 
 		void checkEntitlement();
 		void getUser(String userID);
@@ -67,6 +68,8 @@ namespace godot {
 		void processGetInvitableUsers(ovrMessageHandle message);
 		void processInviteUser(ovrMessageHandle message);
 		void processSetRoomDescription(ovrMessageHandle message);
+		void processUpdateRoomDataStore(ovrMessageHandle message);
+		void processRoomUpdate(ovrMessageHandle message);
 
 		void processCheckEntitlement(ovrMessageHandle message);
 		void processGetUser(ovrMessageHandle message);

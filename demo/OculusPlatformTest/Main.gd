@@ -39,10 +39,10 @@ func _ready():
 		$OculusPlatformCore.connect("get_current_room_done",self,"_on_get_current_room_done")
 		$OculusPlatformCore.connect("leave_room_done",self,"_on_leave_room_done")
 		$OculusPlatformCore.connect("join_room_done",self,"_on_join_room_done")
-		$OculusPlatformCore.connect("kick_user_done",self,"_on_kick_user_done")
 		$OculusPlatformCore.connect("get_invitable_users_done",self,"_on_get_invitable_users_done")
-		$OculusPlatformCore.connect("invite_user_done",self,"_on_invite_user_done")
 		$OculusPlatformCore.connect("set_room_description_done",self,"_on_set_room_description_done")
+		$OculusPlatformCore.connect("update_room_datastore_done",self,"_on_update_room_datastore_done")
+		$OculusPlatformCore.connect("room_update_done",self,"_on_room_update_done")
 		print("room setup done")
 		print ("initializing")
 		$OculusPlatformCore.initialize(APP_ID)
@@ -87,19 +87,74 @@ func _on_getLoggedInUserDone(response):
 	#test_leaderboard()
 	#$OculusPlatformCore.writeCloudData(CLOUD_BUCKET,CLOUD_KEY	,sample_data,"Testdata")
 
+#NONE EVERYONE FRIENDS_OF_MEMBERS FRIENDS_OF_OWNER INVITED_USERS
 func _on_getUserDone(response):
 	print("get user response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
-	$OculusPlatformCore.getLoggedInUserFriends()
+	$OculusPlatformCore.createAndJoinPrivateRoom("NONE",2,true)
 	
+	
+var ROOMID:String 
+
 func _on_create_and_join_private_room_done(response):
-	print("get user response ",response)
+	print("create room response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	ROOMID = response["room_details"]["room_id"]
+	print("room id is ",ROOMID)
+	$OculusPlatformCore.setRoomDescription(ROOMID,"Testroom")
+	$OculusPlatformCore.updateRoomDatastore(ROOMID,"Testkey","Testvalue")
+	$OculusPlatformCore.joinRoom(ROOMID)
+
+func _on_update_room_datastore_done(response):
+	print("set room description response ",response)
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
 
+func _on_room_update_done(response):
+	print("set room update response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+
+func _on_set_room_description_done(response):
+	print("set room description response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+
+func _on_join_room_done(response):
+	print("join room response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return 
+	$OculusPlatformCore.getCurrentRoom()
+	$OculusPlatformCore.getInvitableUsers()
+
+func _on_get_current_room_done(response):
+	print("get room response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	
+	
+func _on_get_invitable_users_done(response):
+	print("get invitable users response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	$OculusPlatformCore.leaveRoom(ROOMID)
+	
+func _on_leave_room_done(response):
+	print("get leave room response ",response)
+	if not response["success"]: 
+		print("error :" ,response["error"]) 
+		return
+	$OculusPlatformCore.getCurrentRoom()
 func _on_getUserTokenDone(response):
 	print(response)
 	if not response["success"]: 
@@ -136,16 +191,8 @@ func _on_get_scoreFromLeaderboardDone(response):
 	if not response["success"]: 
 		print("error :" ,response["error"]) 
 		return
-
-
-
-
-
+		
 # cloud functions ( dont work , bcz functions in sdk not implemented for android )
-
-
-
-
 func _on_writeCloudDataDone(response):
 	print(response)
 	if not response["success"]: 

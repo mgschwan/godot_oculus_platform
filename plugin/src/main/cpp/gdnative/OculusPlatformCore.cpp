@@ -39,7 +39,7 @@ void OculusPlatformCore::_register_methods()
   register_method("getCloudData", &OculusPlatformCore::getCloudData);
   register_method("deleteCloudData", &OculusPlatformCore::deleteCloudData);
   register_method("getCloudMetaData", &OculusPlatformCore::getCloudMetaData);
-
+  register_method("updateRoomDatastore",&OculusPlatformCore::updateRoomDataStore);
   // signals (technically output methods)
   register_signal<OculusPlatformCore>((char *)"platform_initialized", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_entitlement_check_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
@@ -61,12 +61,15 @@ void OculusPlatformCore::_register_methods()
   register_signal<OculusPlatformCore>((char *)"get_invitable_users_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"invite_user_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"set_room_description_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"update_room_datastore_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
+  register_signal<OculusPlatformCore>((char *)"room_update_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
 
   register_signal<OculusPlatformCore>((char *)"write_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"delete_cloud_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
   register_signal<OculusPlatformCore>((char *)"get_cloud_meta_data_done", "response", GODOT_VARIANT_TYPE_DICTIONARY);
 }
+
 #pragma region Godot node functions
 OculusPlatformCore::OculusPlatformCore()
 {
@@ -98,24 +101,24 @@ void OculusPlatformCore::pumpOVRMessages()
       ALOGV("platform initialized async successful");
       processInitializePlatform(message);
       break;
-      //   case ovrMessage_Room_CreateAndJoinPrivate:
-      //     processCreateAndJoinPrivateRoom(message);
-      //     break;
-      //   case ovrMessage_Room_GetCurrent:
-      //     processGetCurrentRoom(message);
-      //     break;
-      //   case ovrMessage_Room_Get:
-      //     processGetRoom(message);
-      //     break;
-      //   case ovrMessage_Room_Leave:
-      //     processLeaveRoom(message);
-      //     break;
-      //   case ovrMessage_Room_Join:
-      //     processJoinRoom(message);
-      //     break;
-      //   case ovrMessage_Room_KickUser:
-      //     processKickUser(message);
-      //     break;
+    case ovrMessage_Room_CreateAndJoinPrivate:
+      processCreateAndJoinPrivateRoom(message);
+      break;
+    case ovrMessage_Room_GetCurrent:
+      processGetCurrentRoom(message);
+      break;
+    case ovrMessage_Room_Get:
+      processGetRoom(message);
+      break;
+    case ovrMessage_Room_Leave:
+      processLeaveRoom(message);
+      break;
+    case ovrMessage_Room_Join:
+      processJoinRoom(message);
+      break;
+    case ovrMessage_Room_KickUser:
+      processKickUser(message);
+      break;
     case ovrMessage_User_GetLoggedInUser:
       processGetLoggedInUser(message);
       break;
@@ -125,21 +128,21 @@ void OculusPlatformCore::pumpOVRMessages()
     case ovrMessage_User_GetLoggedInUserFriends:
       processGetFriends(message);
       break;
-      //   case ovrMessage_Room_GetInvitableUsers:
-      //     processGetInvitableUsers(message);
-      //     break;
-      //   case ovrMessage_Room_InviteUser:
-      //     processInviteUser(message);
-      //     break;
-      //   case ovrMessage_Room_SetDescription:
-      //     processSetRoomDescription(message);
-      //     break;
-      //   case ovrMessage_Room_UpdateDataStore:
-      //     processUpdateRoomDataStore(message);
-      //     break;
-      //   case ovrMessage_Notification_Room_RoomUpdate:
-      //     processRoomUpdate(message);
-      //     break;
+    case ovrMessage_Room_GetInvitableUsers:
+      processGetInvitableUsers(message);
+      break;
+    case ovrMessage_Room_InviteUser:
+      processInviteUser(message);
+      break;
+    case ovrMessage_Room_SetDescription:
+      processSetRoomDescription(message);
+      break;
+    case ovrMessage_Room_UpdateDataStore:
+      processUpdateRoomDataStore(message);
+      break;
+    case ovrMessage_Notification_Room_RoomUpdate:
+      processRoomUpdate(message);
+      break;
     case ovrMessage_User_GetUserProof:
       processGenerateUserProof(message);
       break;
@@ -387,7 +390,7 @@ void OculusPlatformCore::generateUserArray(ovrUserArrayHandle users, Dictionary 
 
   size_t nUsers = ovr_UserArray_GetSize(users);
   ALOGV("friends %u \n",nUsers);
-  response["friends count"] = int(nUsers);
+  response["count"] = int(nUsers);
   Array usersfriends;
   for (size_t i = 0; i < nUsers; ++i)
   {
@@ -559,19 +562,14 @@ void OculusPlatformCore::processGetLeaderboardEntries(ovrMessageHandle message)
 // Room functions
 #pragma region room functions
 // Room join modes are
-// ovrRoom_JoinPolicyNone,
-// ovrRoom_JoinPolicyEveryone,
-// ovrRoom_JoinPolicyFriendsOfMembers,
-// ovrRoom_JoinPolicyFriendsOfOwner,
-// ovrRoom_JoinPolicyInvitedUsers,
-void OculusPlatformCore::createAndJoinPrivateRoom(String joinType, unsigned int maxUsers)
-{
+// NONE EVERYONE FRIENDS_OF_MEMBERS FRIENDS_OF_OWNER INVITED_USERS
+void OculusPlatformCore::createAndJoinPrivateRoom(String joinType, unsigned int maxUsers, bool subscribetoupdates)
+{ 
   ovrRoomJoinPolicy join_type = ovrRoomJoinPolicy_FromString(joinType.alloc_c_string());
-  ALOGV("\nTrying to get create and join private room\n");
-
+  ALOGV("\nTrying to get create and join private room %d\n",join_type);
   ovrRequest req;
 
-  req = ovr_Room_CreateAndJoinPrivate(join_type, maxUsers, true);
+  req = ovr_Room_CreateAndJoinPrivate(join_type, maxUsers, subscribetoupdates);
 }
 
 void OculusPlatformCore::processCreateAndJoinPrivateRoom(ovrMessageHandle message)
@@ -835,14 +833,54 @@ void OculusPlatformCore::processSetRoomDescription(ovrMessageHandle message)
   emit_signal("set_room_description_done", response);
 }
 
+// send null value with key to remove key
+void OculusPlatformCore::updateRoomDataStore(String roomID, String key, String value) {
+  
+  ovrID room_id = std::strtoull(roomID.alloc_c_string(), NULL, 10);
+  printf("\nTrying to update data store for room %llu\n", room_id);
+  ovrRequest req;
+
+  ovrKeyValuePair newKVPair;
+  newKVPair.key = key.alloc_c_string();
+  newKVPair.valueType = ovrKeyValuePairType_String;
+  newKVPair.stringValue = value.alloc_c_string();
+
+  req = ovr_Room_UpdateDataStore(room_id, &newKVPair, 1);
+}
+
+void OculusPlatformCore::processUpdateRoomDataStore(ovrMessageHandle message) {
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if(response["success"]){
+    printf("Received update data store success\n");
+    ovrRoomHandle room = ovr_Message_GetRoom(message);
+    outputRoomDetails(room,response);
+  } else {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    printf("Received update room data failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("update_room_datastore_done", response);
+}
+
+void OculusPlatformCore::processRoomUpdate(ovrMessageHandle message) {
+  Dictionary response;
+  response["success"] = !ovr_Message_IsError(message);
+  if(response["success"]){
+    printf("Received room update Notification\n");
+    ovrRoomHandle room = ovr_Message_GetRoom(message);
+    outputRoomDetails(room, response);
+  } else {
+    const ovrErrorHandle error = ovr_Message_GetError(message);
+    printf("Received room update failure: %s\n", ovr_Error_GetMessage(error));
+    response["error"] = ovr_Error_GetMessage(error);
+  }
+  emit_signal("room_update_done", response);
+}
+
 void OculusPlatformCore::outputRoomDetails(ovrRoomHandle room, Dictionary &response)
 {
   Dictionary _roomdetails;
-  ALOGV(
-      "Room ID: %llu, App ID: %llu, Description: %s\n",
-      ovr_Room_GetID(room),
-      ovr_Room_GetApplicationID(room),
-      ovr_Room_GetDescription(room));
 
   _roomdetails["room_id"] = String::num_int64(ovr_Room_GetID(room));
   _roomdetails["room_app_id"] = String::num_int64(ovr_Room_GetApplicationID(room));
@@ -850,14 +888,13 @@ void OculusPlatformCore::outputRoomDetails(ovrRoomHandle room, Dictionary &respo
   response["room_details"] = _roomdetails;
 
   size_t maxUsers = ovr_Room_GetMaxUsers(room);
-  ALOGV("maxUsers: %d\nusers in room:\n", maxUsers);
-
+  
   response["max_users"] = int(maxUsers);
 
   ovrUserHandle owner = ovr_Room_GetOwner(room);
 
   Dictionary _owner;
-  ALOGV("Room owner: %llu %s\n", ovr_User_GetID(owner), ovr_User_GetOculusID(owner));
+  
   _owner["user_id"] = String::num_int64(ovr_User_GetID(owner));
   _owner["oculus_id"] = ovr_User_GetOculusID(owner);
   response["owner"] = _owner;
