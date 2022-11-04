@@ -5,9 +5,10 @@
 // with loads of help from Thomas "Karroffel" Herzog
 
 #include "common.h"
-#include <vector>
 
-namespace ovrplatform {
+using namespace std;
 
 
-} // namespace ovrplatform
+
+
+ // namespace ovrplatform
